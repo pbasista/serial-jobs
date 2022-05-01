@@ -1,0 +1,204 @@
+mqtt_brokers:
+  - id: local
+    host: 127.0.0.1
+    port: 1883
+    username:
+    password:
+
+devices:
+  - id: epever-xtra-4415n
+    name: EPEVER XTRA 4415N MPPT charge controller
+    serial:
+      port: /dev/ttyUSB0
+      baud_rate: 115200
+      data_bits: 8
+      stop_bits: 1
+      parity: N
+      timeout: 0.05
+    protocol:
+      modbus_address: 0x11
+  - id: jbd-sp04s034-l4s-200
+    name: JBD SP04S034 L4S 200A B U R H battery management system
+    type: BMSDevice
+    serial:
+      port: /dev/ttyUSB0
+      baud_rate: 9600
+      data_bits: 8
+      stop_bits: 1
+      parity: N
+      timeout: 0.1
+  - id: orno-or-we-514
+    name: ORNO OR-WE-514 single phase energy meter
+    serial:
+      port: /dev/ttyUSB0
+      baud_rate: 9600
+      data_bits: 8
+      stop_bits: 1
+      parity: E
+      timeout: 0.1
+    protocol:
+      modbus_address: 0x13
+
+tasks:
+  - id: e-datetime
+    name: current date and time
+    device: epever-xtra-4415n
+    mqtt_topic: datetime
+    value:
+      type: datetime
+      data:
+        - register_byte:
+            address: 0x9015
+            byte_index: 1
+        - register_byte:
+            address: 0x9015
+            byte_index: 0
+        - register_byte:
+            address: 0x9014
+            byte_index: 1
+        - register_byte:
+            address: 0x9014
+            byte_index: 0
+        - register_byte:
+            address: 0x9013
+            byte_index: 1
+        - register_byte:
+            address: 0x9013
+            byte_index: 0
+  - id: e-battery-temperature
+    name: battery temperature in degrees Celsius
+    device: epever-xtra-4415n
+    mqtt_topic: battery_temperature
+    value:
+      scale_factor: 100
+      data:
+        - register:
+            address: 0x3110
+  - id: e-battery-type
+    name: battery type
+    device: epever-xtra-4415n
+    mqtt_topic: battery_type
+    value:
+      mapping:
+        0: user-defined
+        1: sealed
+        2: gel
+        3: flooded
+      data:
+        - register:
+            address: 0x9000
+  - id: e-charging-status
+    name: charging equipment status
+    device: epever-xtra-4415n
+    mqtt_topic: charging_status
+    value:
+      mapping:
+        0: standby
+        1: running
+      data:
+        - input_register:
+            address: 0x3201
+            bitmask: 0b1
+  - id: e-charging-fault
+    name: charging equipment fault
+    device: epever-xtra-4415n
+    mqtt_topic: charging_fault
+    value:
+      mapping:
+        0: false
+        1: true
+      data:
+        - input_register:
+            address: 0x3201
+            bitmask: 0b10
+            bitrightshift: 1
+  - id: e-charging-type
+    name: charging equipment charge type
+    device: epever-xtra-4415n
+    mqtt_topic: charge_type
+    value:
+      mapping:
+        0: no charging
+        1: float
+        2: boost
+        3: equalization
+      data:
+        - input_register:
+            address: 0x3201
+            bitmask: 0b1100
+            bitrightshift: 2
+  - id: e-charging-device-on
+    name: charging device turned on
+    device: epever-xtra-4415n
+    mqtt_topic: charging_device_on
+    value:
+      mapping:
+        0: false
+        1: true
+      data:
+        - coil:
+            address: 0x0
+  - id: j-remaining-electric-charge
+    name: remaining battery electric charge in Ah
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: battery_remaining_electric_charge
+    value:
+      scale_factor: 100
+      data:
+        - register_byte:
+            address: 0x03
+            byte_index: 2
+  - id: o-datetime
+    name: current date and time
+    device: orno-or-we-514
+    mqtt_topic: datetime
+    value:
+      type: datetime
+      data:
+        - register_byte:
+            address: 0x8120
+            byte_index: 0
+        - register_byte:
+            address: 0x8120
+            byte_index: 1
+        - register_byte:
+            address: 0x8121
+            byte_index: 0
+        - register_byte:
+            address: 0x8121
+            byte_index: 1
+        - register_byte:
+            address: 0x8122
+            byte_index: 0
+        - register_byte:
+            address: 0x8122
+            byte_index: 1
+  - id: o-frequency
+    name: power frequency in Hz
+    device: orno-or-we-514
+    mqtt_topic: frequency
+    value:
+      scale_factor: 100
+      data:
+        - register:
+            address: 0x130
+
+jobs:
+  - id: charge-controller
+    sleep: 60
+    tasks:
+      - e-datetime
+      - e-battery-temperature
+  - id: charge-controller-important
+    sleep: 3
+    tasks:
+      - e-charging-type
+  - id: battery-management-system
+    sleep: 60
+    tasks:
+      - j-remaining-electric-charge
+  - id: power-meter
+    sleep: 60
+    tasks:
+      - o-datetime
+      - o-frequency
