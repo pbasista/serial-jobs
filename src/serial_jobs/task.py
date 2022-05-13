@@ -1,39 +1,40 @@
-"""Functions related to performing tasks."""
+"""Functionality related to performing tasks."""
 from __future__ import annotations
 
 from dataclasses import dataclass
 from logging import getLogger
+from typing import ClassVar
 
-from .base import CachedInstance
 from .device import Device
 from .mqtt import MQTTBroker
+from .specification import SpecMixin
 from .value import Value
 
 LOGGER = getLogger(__name__)
 
 
 @dataclass(frozen=True)
-class Task(CachedInstance):
-    name: str | None
+class Task(SpecMixin):
+    specs_by_id: ClassVar[dict[str, dict]] = {}
+
     mqtt_topic: str
     mqtt_broker: MQTTBroker
     device: Device
     value: Value
 
     @classmethod
-    def from_config(cls, task_config: dict) -> Task:
-        task_id = task_config["id"]
-        name = task_config.get("name")
-        mqtt_topic = task_config["mqtt_topic"]
-        mqtt_broker_id = task_config.get("mqtt_broker")
-        mqtt_broker = MQTTBroker.get_by_id(mqtt_broker_id)
-        device_id = task_config.get("device")
-        device = Device.get_by_id(device_id)
-        value_config = task_config["value"]
-        value = Value.from_config(value_config)
-        device = Device.get_by_id(device_id)
+    def from_spec(cls, spec: dict) -> Task:
+        task_id = spec["id"]
+        name = spec.get("name")
+        mqtt_topic = spec["mqtt_topic"]
+        mqtt_broker_id = spec.get("mqtt_broker", MQTTBroker.default_id())
+        mqtt_broker = MQTTBroker.from_id(mqtt_broker_id)
+        device_id = spec.get("device", Device.default_id())
+        device = Device.from_id(device_id)
+        value_spec = spec["value"]
+        value = Value.from_spec(value_spec)
         return cls(
-            instance_id=task_id,
+            spec_id=task_id,
             name=name,
             mqtt_topic=mqtt_topic,
             mqtt_broker=mqtt_broker,
@@ -41,13 +42,35 @@ class Task(CachedInstance):
             value=value,
         )
 
-    async def perform(self) -> None:
-        LOGGER.info("performing task %s", self.instance_id)
-        value = self.value.get(self.device)
+    def clear_data(self) -> int:
+        """Clear the data for this task on the configured device.
+
+        Return the number of registers cleared.
+        """
+        return self.device.clear_registers(self.value.register_specs)
+
+    def fetch_data(self) -> int:
+        """Fetch the data for this task from the configured device.
+
+        Return the number of bytes read.
+        """
+        return self.device.read_registers(self.value.register_specs)
+
+    async def perform(self, send_task_messages: bool = True) -> None:
+        """Calculate specified value using data previously read from device."""
+        LOGGER.info("performing task %s", self.spec_id)
+        # TODO Handle timeouts and recover from them gracefully
+        calculated_value = str(self.value.calculate(self.device))
         LOGGER.debug(
-            "task %s: publishing to MQTT topic %s payload %s",
-            self.instance_id,
+            "task %s: publishing to MQTT topic %s payload: %s",
+            self.spec_id,
             self.mqtt_topic,
-            value,
+            calculated_value,
         )
-        self.mqtt_broker.client.publish(self.mqtt_topic, value)
+        if send_task_messages:
+            self.mqtt_broker.publish(self.mqtt_topic, calculated_value)
+        else:
+            LOGGER.warning(
+                "task %s: NOT publishing message to MQTT broker",
+                self.spec_id,
+            )

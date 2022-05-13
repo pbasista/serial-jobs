@@ -2,6 +2,8 @@
 from re import compile as re_compile
 
 from strictyaml import (
+    Any,
+    Bool,
     Enum,
     Float,
     HexInt,
@@ -14,6 +16,8 @@ from strictyaml import (
     Str,
     UniqueSeq,
 )
+
+from .data import Data
 
 
 class YAMLSerializationError(ValueError):
@@ -83,47 +87,37 @@ device_schema = Map(
 
 devices_schema = Seq(device_schema)
 
-coil_schema = Map(
-    {
-        "address": HexInt(),
-    }
-)
-
-register_byte_schema = Map(
-    {
-        "address": HexInt(),
-        Optional("byte_index"): Int(),
-        Optional("bitmask"): BinInt(),
-        Optional("bitrightshift"): Int(),
-    }
-)
-
 register_schema = Map(
     {
+        Optional("register_type", default="default"): Enum(
+            ("default", "coil", "discrete", "holding", "input")
+        ),
+        Optional("register_count", default=1): Int(),
         "address": HexInt(),
+        Optional("byte_order"): Seq(Int()),
+        Optional("byte_offset"): Int(),
+        Optional("byte_count"): Int(),
+        Optional("byte_index"): Int(),  # if defined, overrides offset and count
         Optional("bitmask"): BinInt(),
-        Optional("bitrightshift"): Int(),
+        Optional("bitshift"): Int(),  # if positive, shift to the right
+        Optional("scale_factor"): Int(),
+        Optional("increase_by"): Int(),
     }
 )
 
-data_part_schema = Map(
-    {
-        Optional("discrete_input"): coil_schema,
-        Optional("coil"): coil_schema,
-        Optional("register_byte"): register_byte_schema,
-        Optional("input_register_byte"): register_byte_schema,
-        Optional("register"): register_schema,
-        Optional("input_register"): register_schema,
-    }
+data_part_schema = MapPattern(
+    Enum(list(Data.format_strings.keys()) + ["string"]),
+    register_schema,
+    minimum_keys=1,
+    maximum_keys=1,
 )
 
 data_schema = Seq(data_part_schema)
 
 value_schema = Map(
     {
-        Optional("type"): Str(),
-        Optional("mapping"): MapPattern(Int(), Str()),
-        Optional("scale_factor"): Int(),
+        Optional("type"): Enum(("date", "datetime", "time")),
+        Optional("mapping"): MapPattern(Str(), Str()),
         "data": data_schema,
     }
 )
@@ -145,7 +139,10 @@ job_schema = Map(
     {
         "id": Str(),
         Optional("name"): Str(),
+        Optional("mqtt_broker"): Str(),
+        Optional("mqtt_messages"): Seq(MapPattern(Str(), MapPattern(Str(), Any()))),
         "sleep": Int(),
+        Optional("enabled"): Bool(),
         "tasks": UniqueSeq(Str()),
     }
 )

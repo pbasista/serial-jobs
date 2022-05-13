@@ -7,7 +7,7 @@ mqtt_brokers:
 
 devices:
   - id: epever-xtra-4415n
-    name: EPEVER XTRA 4415N MPPT charge controller
+    name: EPEVER XTRA 4415N MPPT solar charge controller
     serial:
       port: /dev/ttyUSB0
       baud_rate: 115200
@@ -43,79 +43,185 @@ tasks:
   - id: e-datetime
     name: current date and time
     device: epever-xtra-4415n
-    mqtt_topic: datetime
+    mqtt_topic: epever-xtra-4415n/datetime
     value:
       type: datetime
       data:
-        - register_byte:
-            address: 0x9015
-            byte_index: 1
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x9015
             byte_index: 0
-        - register_byte:
-            address: 0x9014
+            increase_by: 2000
+        - byte:
+            register_type: holding
+            address: 0x9015
             byte_index: 1
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x9014
             byte_index: 0
-        - register_byte:
-            address: 0x9013
+        - byte:
+            register_type: holding
+            address: 0x9014
             byte_index: 1
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x9013
             byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x9013
+            byte_index: 1
+  - id: e-solar-voltage
+    name: solar voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/solar-voltage
+    value:
+      data:
+        - short:
+            address: 0x3100
+            scale_factor: 100
+  - id: e-solar-current
+    name: solar current in A
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/solar-current
+    value:
+      data:
+        - short:
+            address: 0x3101
+            scale_factor: 100
+  - id: e-solar-power
+    name: solar power in W
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/solar-power
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3102
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-battery-charging-power
+    name: battery charging power in W
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-charging-power
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3106
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
   - id: e-battery-temperature
     name: battery temperature in degrees Celsius
     device: epever-xtra-4415n
-    mqtt_topic: battery_temperature
+    mqtt_topic: epever-xtra-4415n/battery-temperature
     value:
-      scale_factor: 100
       data:
-        - register:
+        - signed_short:
             address: 0x3110
-  - id: e-battery-type
-    name: battery type
+            scale_factor: 100
+  - id: e-device-temperature
+    name: device temperature in degrees Celsius
     device: epever-xtra-4415n
-    mqtt_topic: battery_type
+    mqtt_topic: epever-xtra-4415n/device-temperature
+    value:
+      data:
+        - signed_short:
+            address: 0x3111
+            scale_factor: 100
+  - id: e-power-components-temperature
+    name: power components' temperature in degrees Celsius
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/power-components-temperature
+    value:
+      data:
+        - signed_short:
+            address: 0x3112
+            scale_factor: 100
+  - id: e-battery-estimated-soc
+    name: "battery estimated state of charge in %"
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-estimated-soc
+    value:
+      data:
+        - short:
+            address: 0x311A
+  - id: e-remote-battery-temperature
+    name: battery temperature reported by remote sensor in degrees Celsius
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/remote-battery-temperature
+    value:
+      data:
+        - signed_short:
+            address: 0x311B
+            scale_factor: 100
+  - id: e-battery-voltage-status
+    name: battery voltage status
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-voltage-status
     value:
       mapping:
-        0: user-defined
-        1: sealed
-        2: gel
-        3: flooded
+        0: normal
+        1: overvoltage
+        2: undervoltage
+        3: low voltage disconnect
+        4: fault
       data:
-        - register:
-            address: 0x9000
+        - short:
+            address: 0x3200
+            bitmask: 0b1111
+  - id: e-battery-temperature-status
+    name: battery temperature status
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-temperature-status
+    value:
+      mapping:
+        0: normal
+        1: high temperature warning
+        2: low temperature warning
+      data:
+        - short:
+            address: 0x3200
+            bitmask: 0b11110000
+            bitshift: 4
   - id: e-charging-status
     name: charging equipment status
     device: epever-xtra-4415n
-    mqtt_topic: charging_status
-    value:
-      mapping:
-        0: standby
-        1: running
-      data:
-        - input_register:
-            address: 0x3201
-            bitmask: 0b1
-  - id: e-charging-fault
-    name: charging equipment fault
-    device: epever-xtra-4415n
-    mqtt_topic: charging_fault
+    mqtt_topic: epever-xtra-4415n/charging-status
     value:
       mapping:
         0: false
         1: true
       data:
-        - input_register:
+        - short:
+            address: 0x3201
+            bitmask: 0b1
+  - id: e-charging-fault
+    name: charging equipment fault
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/charging-fault
+    value:
+      mapping:
+        0: false
+        1: true
+      data:
+        - short:
             address: 0x3201
             bitmask: 0b10
-            bitrightshift: 1
+            bitshift: 1
   - id: e-charging-type
-    name: charging equipment charge type
+    name: charging equipment charging type
     device: epever-xtra-4415n
-    mqtt_topic: charge_type
+    mqtt_topic: epever-xtra-4415n/charging-type
     value:
       mapping:
         0: no charging
@@ -123,31 +229,549 @@ tasks:
         2: boost
         3: equalization
       data:
-        - input_register:
+        - short:
             address: 0x3201
             bitmask: 0b1100
-            bitrightshift: 2
+            bitshift: 2
+  - id: e-generated-energy-today
+    name: generated energy today in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/generated-energy-today
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x330C
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-generated-energy
+    name: generated energy in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/generated-energy
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3312
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-battery-voltage
+    name: battery voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-voltage
+    value:
+      data:
+        - short:
+            address: 0x331A
+            scale_factor: 100
+  - id: e-battery-net-current
+    name: battery net current in A
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-net-current
+    value:
+      data:
+        - signed_long:
+            register_count: 2
+            address: 0x331B
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-combined-battery-temperature
+    name: combined battery temperature in degrees Celsius
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/combined-battery-temperature
+    value:
+      data:
+        - signed_short:
+            address: 0x331D
+            scale_factor: 100
+  - id: e-ambient-temperature
+    name: ambient temperature in degrees Celsius
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/ambient-temperature
+    value:
+      data:
+        - signed_short:
+            address: 0x331E
+            scale_factor: 100
+  - id: e-battery-type
+    name: battery type
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-type
+    value:
+      mapping:
+        0: user-defined
+        1: sealed
+        2: gel
+        3: flooded
+        4: 4S LiFePo4
+      data:
+        - short:
+            register_type: holding
+            address: 0x9000
+  - id: e-battery-rated-electric-charge
+    name: battery rated electric charge in Ah
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-rated-electric-charge
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9001
+  - id: e-temperature-compensation-coefficient
+    name: battery temperature ation coefficient in mv/K/2V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/temperature-compensation-coefficient
+    value:
+      data:
+        - signed_short:
+            register_type: holding
+            address: 0x9002
+            scale_factor: 100
+  - id: e-battery-high-voltage-disconnect
+    name: battery high voltage disconnect voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-high-voltage-disconnect
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9003
+            scale_factor: 100
+  - id: e-battery-charging-limit-voltage
+    name: battery charging limit voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-charging-limit-voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9004
+            scale_factor: 100
+  - id: e-battery-high-voltage-reconnect
+    name: battery high voltage reconnect voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-high-voltage-reconnect
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9005
+            scale_factor: 100
+  - id: e-battery-equalization-voltage
+    name: battery equalization voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-equalization-voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9006
+            scale_factor: 100
+  - id: e-battery-boost-voltage
+    name: battery boost voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-boost-voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9007
+            scale_factor: 100
+  - id: e-battery-float-voltage
+    name: battery float voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-float-voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9008
+            scale_factor: 100
+  - id: e-battery-boost-reconnect-voltage
+    name: battery boost reconnect voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-boost-reconnect-voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9009
+            scale_factor: 100
+  - id: e-battery-low-voltage-reconnect
+    name: battery low voltage reconnect voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-low-voltage-reconnect
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x900A
+            scale_factor: 100
+  - id: e-battery-undervoltage-recovery
+    name: battery undervoltage recovery voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-undervoltage-recovery
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x900B
+            scale_factor: 100
+  - id: e-battery-undervoltage-warning
+    name: battery undervoltage warning voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-undervoltage-warning
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x900C
+            scale_factor: 100
+  - id: e-battery-low-voltage-disconnect
+    name: battery low voltage disconnect voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-low-voltage-disconnect
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x900D
+            scale_factor: 100
+  - id: e-battery-discharging-limit
+    name: battery discharging limit voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-discharging-limit
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x900E
+            scale_factor: 100
+  - id: e-battery-equalization-cycle
+    name: battery equalization cycle length in days
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-equalization-cycle
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x9016
+  - id: e-battery-equalization-duration
+    name: battery equalization duration in minutes
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-equalization-duration
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x906B
+  - id: e-battery-boost-duration
+    name: battery boost duration in minutes
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-boost-duration
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x906C
+  - id: e-battery-impedance
+    name: impedance of the battery connection in milliOhms
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-impedance
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x901D
+            scale_factor: 100
   - id: e-charging-device-on
     name: charging device turned on
     device: epever-xtra-4415n
-    mqtt_topic: charging_device_on
+    mqtt_topic: epever-xtra-4415n/charging-device-on
     value:
       mapping:
         0: false
         1: true
       data:
-        - coil:
+        - byte:
+            register_type: coil
             address: 0x0
-  - id: j-remaining-electric-charge
-    name: remaining battery electric charge in Ah
+  - id: j-battery-voltage
+    name: battery voltage in V
     device: jbd-sp04s034-l4s-200
-    mqtt_topic: battery_remaining_electric_charge
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-voltage
     value:
-      scale_factor: 100
       data:
-        - register_byte:
+        - short:
             address: 0x03
-            byte_index: 2
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-net-current
+    name: battery net current in A
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-net-current
+    value:
+      data:
+        - signed_short:
+            address: 0x03
+            byte_offset: 2
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-electric-charge
+    name: battery electric charge in Ah
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-electric-charge
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 4
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-nominal-electric-charge
+    name: battery nominal electric charge in Ah
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-nominal-electric-charge
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 6
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-number-of-cycles
+    name: number of battery cycles
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-number-of-cycles
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 8
+            byte_count: 2
+  - id: j-battery-soc
+    name: "battery state of charge in %"
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-soc
+    value:
+      data:
+        - byte:
+            address: 0x03
+            byte_offset: 19
+            byte_count: 1
+  - id: j-battery-number-of-cells
+    name: number of battery cells
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-number-of-cells
+    value:
+      data:
+        - byte:
+            address: 0x03
+            byte_offset: 21
+            byte_count: 1
+  - id: j-number-of-temperature-sensors
+    name: number of temperature sensors
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/number-of-temperature-sensors
+    value:
+      data:
+        - byte:
+            address: 0x03
+            byte_offset: 22
+            byte_count: 1
+  - id: j-temperature-1
+    name: temperature of the first sensor in degrees Celsius
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/temperature-1
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 23
+            byte_count: 2
+            increase_by: -2731  # Kelvin to Celsius
+            scale_factor: 10
+  - id: j-temperature-2
+    name: temperature of the second sensor in degrees Celsius
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/temperature-2
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 25
+            byte_count: 2
+            increase_by: -2731  # Kelvin to Celsius
+            scale_factor: 10
+  - id: j-temperature-3
+    name: temperature of the third sensor in degrees Celsius
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/temperature-3
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 27
+            byte_count: 2
+            increase_by: -2731  # Kelvin to Celsius
+            scale_factor: 10
+  - id: j-cell-1-voltage
+    name: voltage of cell 1 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-1-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 0
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-cell-2-voltage
+    name: voltage of cell 2 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-2-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 2
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-cell-3-voltage
+    name: voltage of cell 3 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-3-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 4
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-cell-4-voltage
+    name: voltage of cell 4 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-4-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 6
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-hardware-revision
+    name: hardware revision of the device
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/hardware-revision
+    value:
+      data:
+        - string:
+            address: 0x05
+  - id: o-frequency
+    name: power frequency in Hz
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/frequency
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x130
+            scale_factor: 100
+  - id: o-voltage
+    name: voltage in V
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x131
+            scale_factor: 100
+  - id: o-current
+    name: current in A
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/current
+    value:
+      data:
+        - long:
+            register_type: holding
+            register_count: 2
+            address: 0x139
+            scale_factor: 1000
+  - id: o-active-power
+    name: active power in W
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/active-power
+    value:
+      data:
+        - signed_long:
+            register_type: holding
+            register_count: 2
+            address: 0x140
+  - id: o-reactive-power
+    name: reactive power in var
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/reactive-power
+    value:
+      data:
+        - signed_long:
+            register_type: holding
+            register_count: 2
+            address: 0x148
+  - id: o-apparent-power
+    name: apparent power in VA
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/apparent-power
+    value:
+      data:
+        - signed_long:
+            register_type: holding
+            register_count: 2
+            address: 0x150
+  - id: o-power-factor
+    name: "power factor in %"
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/power-factor
+    value:
+      data:
+        - signed_short:
+            register_type: holding
+            address: 0x158
+            scale_factor: 10
+  - id: o-active-energy
+    name: consumed active energy in kWh
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/active-energy
+    value:
+      data:
+        - long:
+            register_type: holding
+            register_count: 2
+            address: 0xA000
+            scale_factor: 100
+  - id: o-reactive-energy
+    name: consumed reactive energy in kvarh
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/reactive-energy
+    value:
+      data:
+        - long:
+            register_type: holding
+            register_count: 2
+            address: 0xA01E
+            scale_factor: 100
   - id: o-datetime
     name: current date and time
     device: orno-or-we-514
@@ -155,50 +779,826 @@ tasks:
     value:
       type: datetime
       data:
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x8120
             byte_index: 0
-        - register_byte:
+            increase_by: 2000
+        - byte:
+            register_type: holding
             address: 0x8120
             byte_index: 1
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x8121
             byte_index: 0
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x8121
             byte_index: 1
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x8122
             byte_index: 0
-        - register_byte:
+        - byte:
+            register_type: holding
             address: 0x8122
             byte_index: 1
-  - id: o-frequency
-    name: power frequency in Hz
-    device: orno-or-we-514
-    mqtt_topic: frequency
-    value:
-      scale_factor: 100
-      data:
-        - register:
-            address: 0x130
 
 jobs:
-  - id: charge-controller
-    sleep: 60
+  - id: charge-controller-config
+    mqtt_messages:
+      - homeassistant/sensor/default/charge-controller-datetime/config:
+          device:
+            name: EPEVER solar charge controller
+            manufacturer: EPEVER
+            model: XTRA 4415N
+            identifiers: epever-xtra-4415n
+          device_class: timestamp
+          entity_category: config
+          name: Date and Time
+          state_class: measurement
+          state_topic: epever-xtra-4415n/datetime
+          object_id: epever-xtra-4415n-datetime
+          unique_id: epever-xtra-4415n-datetime
+      - homeassistant/sensor/default/charge-controller-battery-type/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Battery Type
+          state_topic: epever-xtra-4415n/battery-type
+          object_id: epever-xtra-4415n-battery-type
+          unique_id: epever-xtra-4415n-battery-type
+      - homeassistant/sensor/default/charge-controller-battery-rated-electric-charge/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Battery Rated Electric Charge
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-rated-electric-charge
+          object_id: epever-xtra-4415n-battery-rated-electric-charge
+          unique_id: epever-xtra-4415n-battery-rated-electric-charge
+          unit_of_measurement: Ah
+      - homeassistant/sensor/default/charge-controller-temperature-compensation-coefficient/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Temperature Compensation Coefficient
+          state_class: measurement
+          state_topic: epever-xtra-4415n/temperature-compensation-coefficient
+          object_id: epever-xtra-4415n-temperature-compensation-coefficient
+          unique_id: epever-xtra-4415n-temperature-compensation-coefficient
+          unit_of_measurement: mv/K/2V
+      - homeassistant/sensor/default/charge-controller-battery-high-voltage-disconnect/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery High Voltage Disconnect
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-high-voltage-disconnect
+          object_id: epever-xtra-4415n-battery-high-voltage-disconnect
+          unique_id: epever-xtra-4415n-battery-high-voltage-disconnect
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-charging-limit-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Charging Limit Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-charging-limit-voltage
+          object_id: epever-xtra-4415n-battery-charging-limit-voltage
+          unique_id: epever-xtra-4415n-battery-charging-limit-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-high-voltage-reconnect/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery High Voltage Reconnect Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-high-voltage-reconnect
+          object_id: epever-xtra-4415n-battery-high-voltage-reconnect
+          unique_id: epever-xtra-4415n-battery-high-voltage-reconnect
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-equalization-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Equalization Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-equalization-voltage
+          object_id: epever-xtra-4415n-battery-equalization-voltage
+          unique_id: epever-xtra-4415n-battery-equalization-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-boost-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Boost Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-boost-voltage
+          object_id: epever-xtra-4415n-battery-boost-voltage
+          unique_id: epever-xtra-4415n-battery-boost-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-float-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Float Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-float-voltage
+          object_id: epever-xtra-4415n-battery-float-voltage
+          unique_id: epever-xtra-4415n-battery-float-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-boost-reconnect-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Boost Reconnect Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-boost-reconnect-voltage
+          object_id: epever-xtra-4415n-battery-boost-reconnect-voltage
+          unique_id: epever-xtra-4415n-battery-boost-reconnect-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-low-voltage-reconnect/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Low Voltage Reconnect Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-low-voltage-reconnect
+          object_id: epever-xtra-4415n-battery-low-voltage-reconnect
+          unique_id: epever-xtra-4415n-battery-low-voltage-reconnect
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-undervoltage-recovery/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Undervoltage Recovery Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-undervoltage-recovery
+          object_id: epever-xtra-4415n-battery-undervoltage-recovery
+          unique_id: epever-xtra-4415n-battery-undervoltage-recovery
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-undervoltage-warning/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Undervoltage Warning Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-undervoltage-warning
+          object_id: epever-xtra-4415n-battery-undervoltage-warning
+          unique_id: epever-xtra-4415n-battery-undervoltage-warning
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-low-voltage-disconnect/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Low Voltage Disconnect
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-low-voltage-disconnect
+          object_id: epever-xtra-4415n-battery-low-voltage-disconnect
+          unique_id: epever-xtra-4415n-battery-low-voltage-disconnect
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-discharging-limit/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Discharging Limit Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-discharging-limit
+          object_id: epever-xtra-4415n-battery-discharging-limit
+          unique_id: epever-xtra-4415n-battery-discharging-limit
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-equalization-cycle/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Battery Equalization Cycle
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-equalization-cycle
+          object_id: epever-xtra-4415n-battery-equalization-cycle
+          unique_id: epever-xtra-4415n-battery-equalization-cycle
+          unit_of_measurement: days
+      - homeassistant/sensor/default/charge-controller-battery-equalization-duration/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: duration
+          entity_category: config
+          name: Battery Equalization Duration
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-equalization-duration
+          object_id: epever-xtra-4415n-battery-equalization-duration
+          unique_id: epever-xtra-4415n-battery-equalization-duration
+          unit_of_measurement: minutes
+      - homeassistant/sensor/default/charge-controller-battery-boost-duration/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Battery Boost Duration
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-boost-duration
+          object_id: epever-xtra-4415n-battery-boost-duration
+          unique_id: epever-xtra-4415n-battery-boost-duration
+          unit_of_measurement: minutes
+    sleep: 1000
     tasks:
       - e-datetime
+      - e-battery-type
+      - e-battery-rated-electric-charge
+      - e-temperature-compensation-coefficient
+      - e-battery-high-voltage-disconnect
+      - e-battery-charging-limit-voltage
+      - e-battery-high-voltage-reconnect
+      - e-battery-equalization-voltage
+      - e-battery-boost-voltage
+      - e-battery-float-voltage
+      - e-battery-boost-reconnect-voltage
+      - e-battery-low-voltage-reconnect
+      - e-battery-undervoltage-recovery
+      - e-battery-undervoltage-warning
+      - e-battery-low-voltage-disconnect
+      - e-battery-discharging-limit
+      - e-battery-equalization-cycle
+      - e-battery-equalization-duration
+      - e-battery-boost-duration
+  - id: charge-controller
+    mqtt_messages:
+      - homeassistant/sensor/default/charge-controller-battery-temperature/config:
+          device:
+            name: EPEVER solar charge controller
+            manufacturer: EPEVER
+            model: XTRA 4415N
+            identifiers: epever-xtra-4415n
+          device_class: temperature
+          name: Battery Temperature
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-temperature
+          object_id: epever-xtra-4415n-battery-temperature
+          unique_id: epever-xtra-4415n-battery-temperature
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/charge-controller-device-temperature/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: temperature
+          name: Device Temperature
+          state_class: measurement
+          state_topic: epever-xtra-4415n/device-temperature
+          object_id: epever-xtra-4415n-device-temperature
+          unique_id: epever-xtra-4415n-device-temperature
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/charge-controller-power-components-temperature/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: temperature
+          name: Power Components Temperature
+          state_class: measurement
+          state_topic: epever-xtra-4415n/power-components-temperature
+          object_id: epever-xtra-4415n-power-components-temperature
+          unique_id: epever-xtra-4415n-power-components-temperature
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/charge-controller-battery-estimated-soc/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: battery
+          name: Battery estimated State of Charge
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-estimated-soc
+          object_id: epever-xtra-4415n-battery-estimated-soc
+          unique_id: epever-xtra-4415n-battery-estimated-soc
+          unit_of_measurement: "%"
+      - homeassistant/sensor/default/charge-controller-remote-battery-temperature/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: temperature
+          name: Remote Sensor Battery Temperature
+          state_class: measurement
+          state_topic: epever-xtra-4415n/remote-battery-temperature
+          object_id: epever-xtra-4415n-remote-battery-temperature
+          unique_id: epever-xtra-4415n-remote-battery-temperature
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/charge-controller-battery-voltage-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          name: Battery Voltage Status
+          entity_category: diagnostic
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-voltage-status
+          object_id: epever-xtra-4415n-battery-voltage-status
+          unique_id: epever-xtra-4415n-battery-voltage-status
+      - homeassistant/sensor/default/charge-controller-battery-temperature-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Battery Temperature Status
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-temperature-status
+          object_id: epever-xtra-4415n-battery-temperature-status
+          unique_id: epever-xtra-4415n-battery-temperature-status
+      - homeassistant/binary_sensor/default/charge-controller-charging-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging Status
+          payload_off: false
+          payload_on: true
+          state_topic: epever-xtra-4415n/charging-status
+          object_id: epever-xtra-4415n-charging-status
+          unique_id: epever-xtra-4415n-charging-status
+      - homeassistant/binary_sensor/default/charge-controller-charging-fault/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging Fault
+          payload_off: false
+          payload_on: true
+          state_topic: epever-xtra-4415n/charging-fault
+          object_id: epever-xtra-4415n-charging-fault
+          unique_id: epever-xtra-4415n-charging-fault
+      - homeassistant/sensor/default/charge-controller-charging-type/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging Type
+          state_class: measurement
+          state_topic: epever-xtra-4415n/charging-type
+          object_id: epever-xtra-4415n-charging-type
+          unique_id: epever-xtra-4415n-charging-type
+      - homeassistant/sensor/default/charge-controller-combined-battery-temperature/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: temperature
+          name: Combined Battery Temperature
+          state_class: measurement
+          state_topic: epever-xtra-4415n/combined-battery-temperature
+          object_id: epever-xtra-4415n-combined-battery-temperature
+          unique_id: epever-xtra-4415n-combined-battery-temperature
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/charge-controller-ambient-temperature/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: temperature
+          name: Ambient Temperature
+          state_class: measurement
+          state_topic: epever-xtra-4415n/ambient-temperature
+          object_id: epever-xtra-4415n-ambient-temperature
+          unique_id: epever-xtra-4415n-ambient-temperature
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/charge-controller-battery-impedance/config:
+          device:
+            identifiers: epever-xtra-4415n
+          name: Battery Connection Impedance
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-impedance
+          object_id: epever-xtra-4415n-battery-impedance
+          unique_id: epever-xtra-4415n-battery-impedance
+          unit_of_measurement: mΩ
+      - homeassistant/binary_sensor/default/charge-controller-charging-device-on/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Charging Device Turned On
+          payload_off: false
+          payload_on: true
+          state_topic: epever-xtra-4415n/charging-device-on
+          object_id: epever-xtra-4415n-charging-device-on
+          unique_id: epever-xtra-4415n-charging-device-on
+    sleep: 60
+    tasks:
       - e-battery-temperature
-  - id: charge-controller-important
-    sleep: 3
-    tasks:
+      - e-device-temperature
+      - e-power-components-temperature
+      - e-battery-estimated-soc
+      - e-remote-battery-temperature
+      - e-battery-voltage-status
+      - e-battery-temperature-status
+      - e-charging-status
+      - e-charging-fault
       - e-charging-type
+      - e-combined-battery-temperature
+      - e-ambient-temperature
+      - e-battery-impedance
+      - e-charging-device-on
+  - id: charge-controller-important
+    mqtt_messages:
+      - homeassistant/sensor/default/charge-controller-solar-voltage/config:
+          device:
+            name: EPEVER solar charge controller
+            manufacturer: EPEVER
+            model: XTRA 4415N
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          name: Solar Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/solar-voltage
+          object_id: epever-xtra-4415n-solar-voltage
+          unique_id: epever-xtra-4415n-solar-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-solar-current/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: current
+          name: Solar Current
+          state_class: measurement
+          state_topic: epever-xtra-4415n/solar-current
+          object_id: epever-xtra-4415n-solar-current
+          unique_id: epever-xtra-4415n-solar-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/charge-controller-solar-power/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: power
+          name: Solar Power
+          state_class: measurement
+          state_topic: epever-xtra-4415n/solar-power
+          object_id: epever-xtra-4415n-solar-power
+          unique_id: epever-xtra-4415n-solar-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/charge-controller-battery-charging-power/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: power
+          name: Battery Charging Power
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-charging-power
+          object_id: epever-xtra-4415n-battery-charging-power
+          unique_id: epever-xtra-4415n-battery-charging-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/charge-controller-generated-energy-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Generated Energy Today
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/generated-energy-today
+          object_id: epever-xtra-4415n-generated-energy-today
+          unique_id: epever-xtra-4415n-generated-energy-today
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-generated-energy/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Generated Energy
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/generated-energy
+          object_id: epever-xtra-4415n-generated-energy
+          unique_id: epever-xtra-4415n-generated-energy
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-battery-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          name: Battery Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-voltage
+          object_id: epever-xtra-4415n-battery-voltage
+          unique_id: epever-xtra-4415n-battery-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-net-current/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: current
+          name: Battery Net Current
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-net-current
+          object_id: epever-xtra-4415n-battery-net-current
+          unique_id: epever-xtra-4415n-battery-net-current
+          unit_of_measurement: A
+    sleep: 10
+    tasks:
+      - e-solar-voltage
+      - e-solar-current
+      - e-solar-power
+      - e-battery-charging-power
+      - e-generated-energy-today
+      - e-generated-energy
+      - e-battery-voltage
+      - e-battery-net-current
+  - id: battery-management-system-diagnostic
+    mqtt_messages:
+      - homeassistant/sensor/default/bms-battery-nominal-electric-charge/config:
+          device:
+            name: JBD battery management system
+            manufacturer: JBD
+            model: SP04S034 L4S 200A B U R H
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Battery Nominal Electric Charge
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-nominal-electric-charge
+          object_id: jbd-sp04s034-l4s-200-battery-nominal-electric-charge
+          unique_id: jbd-sp04s034-l4s-200-battery-nominal-electric-charge
+          unit_of_measurement: Ah
+      - homeassistant/sensor/default/bms-battery-number-of-cycles/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Number of Cycles
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-number-of-cycles
+          object_id: jbd-sp04s034-l4s-200-battery-number-of-cycles
+          unique_id: jbd-sp04s034-l4s-200-battery-number-of-cycles
+      - homeassistant/sensor/default/bms-battery-number-of-cells/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Number of Cells
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-number-of-cells
+          object_id: jbd-sp04s034-l4s-200-battery-number-of-cells
+          unique_id: jbd-sp04s034-l4s-200-battery-number-of-cells
+      - homeassistant/sensor/default/bms-number-of-temperature-sensors/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Number of Temperature Sensors
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/number-of-temperature-sensors
+          object_id: jbd-sp04s034-l4s-200-number-of-temperature-sensors
+          unique_id: jbd-sp04s034-l4s-200-number-of-temperature-sensors
+      - homeassistant/sensor/default/bms-hardware-revision/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Hardware Revision
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/hardware-revision
+          object_id: jbd-sp04s034-l4s-200-hardware-revision
+          unique_id: jbd-sp04s034-l4s-200-hardware-revision
+    sleep: 1000
+    tasks:
+      - j-battery-nominal-electric-charge
+      - j-battery-number-of-cycles
+      - j-battery-number-of-cells
+      - j-number-of-temperature-sensors
+      - j-hardware-revision
   - id: battery-management-system
+    mqtt_messages:
+      - homeassistant/sensor/default/temperature-1/config:
+          device:
+            name: JBD battery management system
+            manufacturer: JBD
+            model: SP04S034 L4S 200A B U R H
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: temperature
+          entity_category: diagnostic
+          name: Temperature 1
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/temperature-1
+          object_id: jbd-sp04s034-l4s-200-temperature-1
+          unique_id: jbd-sp04s034-l4s-200-temperature-1
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/temperature-2/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: temperature
+          entity_category: diagnostic
+          name: Temperature 2
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/temperature-2
+          object_id: jbd-sp04s034-l4s-200-temperature-2
+          unique_id: jbd-sp04s034-l4s-200-temperature-2
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/temperature-3/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: temperature
+          entity_category: diagnostic
+          name: Temperature 3
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/temperature-3
+          object_id: jbd-sp04s034-l4s-200-temperature-3
+          unique_id: jbd-sp04s034-l4s-200-temperature-3
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/cell-1-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 1 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-1-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-1-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-1-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/cell-2-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 2 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-2-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-2-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-2-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/cell-3-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 3 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-3-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-3-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-3-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/cell-4-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 4 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-4-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-4-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-4-voltage
+          unit_of_measurement: V
     sleep: 60
     tasks:
-      - j-remaining-electric-charge
-  - id: power-meter
-    sleep: 60
+      - j-temperature-1
+      - j-temperature-2
+      - j-temperature-3
+      - j-cell-1-voltage
+      - j-cell-2-voltage
+      - j-cell-3-voltage
+      - j-cell-4-voltage
+  - id: battery-management-system-important
+    mqtt_messages:
+      - homeassistant/sensor/default/bms-battery-voltage/config:
+          device:
+            name: JBD battery management system
+            manufacturer: JBD
+            model: SP04S034 L4S 200A B U R H
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          name: Battery Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-voltage
+          object_id: jbd-sp04s034-l4s-200-battery-voltage
+          unique_id: jbd-sp04s034-l4s-200-battery-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/bms-battery-net-current/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: current
+          name: Battery Net Current
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-net-current
+          object_id: jbd-sp04s034-l4s-200-battery-net-current
+          unique_id: jbd-sp04s034-l4s-200-battery-net-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/bms-battery-electric-charge/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          name: Battery Electric Charge
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-electric-charge
+          object_id: jbd-sp04s034-l4s-200-battery-electric-charge
+          unique_id: jbd-sp04s034-l4s-200-battery-electric-charge
+          unit_of_measurement: Ah
+      - homeassistant/sensor/default/bms-battery-soc/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: battery
+          name: Battery State of Charge
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-soc
+          object_id: jbd-sp04s034-l4s-200-battery-soc
+          unique_id: jbd-sp04s034-l4s-200-battery-soc
+          unit_of_measurement: "%"
+    sleep: 10
+    tasks:
+      - j-battery-voltage
+      - j-battery-net-current
+      - j-battery-electric-charge
+      - j-battery-soc
+  - id: power-meter-datetime
+    sleep: 1000
+    enabled: false  # device does not seem to support it
     tasks:
       - o-datetime
+  - id: power-meter
+    mqtt_messages:
+      - homeassistant/sensor/default/power-meter-active-energy/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          device_class: energy
+          name: Active Energy
+          state_class: total_increasing
+          state_topic: orno-or-we-514/active-energy
+          object_id: orno-or-we-514-active-energy
+          unique_id: orno-or-we-514-active-energy
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/power-meter-reactive-energy/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: energy
+          name: Reactive Energy
+          state_class: total_increasing
+          state_topic: orno-or-we-514/reactive-energy
+          object_id: orno-or-we-514-reactive-energy
+          unique_id: orno-or-we-514-reactive-energy
+          unit_of_measurement: kvarh
+      - homeassistant/sensor/default/power-meter-frequency/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: frequency
+          name: Power frequency
+          state_class: measurement
+          state_topic: orno-or-we-514/frequency
+          object_id: orno-or-we-514-frequency
+          unique_id: orno-or-we-514-frequency
+          unit_of_measurement: Hz
+    sleep: 60
+    tasks:
+      - o-active-energy
+      - o-reactive-energy
       - o-frequency
+  - id: power-meter-important
+    mqtt_messages:
+      - homeassistant/sensor/default/power-meter-active-power/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          device_class: power
+          name: Active Power
+          state_class: measurement
+          state_topic: orno-or-we-514/active-power
+          object_id: orno-or-we-514-active-power
+          unique_id: orno-or-we-514-active-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/power-meter-reactive-power/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: reactive_power
+          name: Reactive Power
+          state_class: measurement
+          state_topic: orno-or-we-514/reactive-power
+          object_id: orno-or-we-514-reactive-power
+          unique_id: orno-or-we-514-reactive-power
+          unit_of_measurement: var
+      - homeassistant/sensor/default/power-meter-apparent-power/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: apparent_power
+          name: Apparent Power
+          state_class: measurement
+          state_topic: orno-or-we-514/apparent-power
+          object_id: orno-or-we-514-apparent-power
+          unique_id: orno-or-we-514-apparent-power
+          unit_of_measurement: VA
+      - homeassistant/sensor/default/power-meter-power-factor/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: power_factor
+          name: Power Factor
+          state_class: measurement
+          state_topic: orno-or-we-514/power-factor
+          object_id: orno-or-we-514-power-factor
+          unique_id: orno-or-we-514-power-factor
+          unit_of_measurement: "%"
+      - homeassistant/sensor/default/power-meter-voltage/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: voltage
+          name: Voltage
+          state_class: measurement
+          state_topic: orno-or-we-514/voltage
+          object_id: orno-or-we-514-voltage
+          unique_id: orno-or-we-514-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/power-meter-current/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: current
+          name: Current
+          state_class: measurement
+          state_topic: orno-or-we-514/current
+          object_id: orno-or-we-514-current
+          unique_id: orno-or-we-514-current
+          unit_of_measurement: A
+    sleep: 10
+    tasks:
+      - o-active-power
+      - o-reactive-power
+      - o-apparent-power
+      - o-power-factor
+      - o-voltage
+      - o-current

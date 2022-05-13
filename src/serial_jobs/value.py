@@ -1,90 +1,58 @@
-"""Functions related to getting the values from devices."""
+"""Functionality related to getting the values from devices."""
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date, datetime, time
+from typing import Generic, TypeVar, Union
 
-from .device import Device
+from .data import Data, RegisterDataT
+from .device import Device, RegisterSpec
 
-
-@dataclass(frozen=True)
-class DataPart:
-    data_part_type: str
-    address: int
-    bitmask: int
-    bitrightshift: int
-    byte_index: int
-    # discrete_input
-    # coil
-    # input_register_byte
-    # register_byte
-    # input_register
-    # register
-
-    @classmethod
-    def from_config(cls, data_part_config: dict) -> DataPart:
-        data_part_type, raw_data_config = next(iter(data_part_config.items()))
-        address = raw_data_config["address"]
-        byte_index = raw_data_config.get("byte_index")
-        bitmask = raw_data_config.get("bitmask")
-        bitrightshift = raw_data_config.get("bitrightshift")
-
-        return cls(
-            data_part_type=data_part_type,
-            address=address,
-            byte_index=byte_index,
-            bitmask=bitmask,
-            bitrightshift=bitrightshift,
-        )
-
-    def get_bytes(self, device: Device) -> bytes:
-        # TODO Handle timeouts and recover from them gracefully
-        return device.read_register(self.address)
+ValueTypeT = TypeVar("ValueTypeT", bound=Union[str, date, datetime, time])
 
 
 @dataclass(frozen=True)
-class Value:
-    value_type: str
-    scale_factor: int
+class Value(Generic[ValueTypeT]):
+    value_type: type[ValueTypeT]
     mapping: dict
-    data: list[DataPart]
+    data: list[Data]
+    register_specs: list[RegisterSpec]
 
     @classmethod
-    def from_config(cls, value_config: dict) -> Value:
-        value_type = value_config.get("type", "unsigned_short")
-        if value_type not in {
-            "unsigned_short",
-            "short",
-            "unsigned_long",
-            "long",
-            "float",
-            "datetime",
-        }:
-            raise ValueError(f"unsupported value type: {value_type}")
-
-        scale_factor = value_config.get("scale_factor", 1)
-        mapping = value_config.get("mapping", {})
-        data = []
-        for data_part_config in value_config["data"]:
-            data.append(DataPart.from_config(data_part_config))
+    def from_spec(cls, spec: dict) -> Value:
+        value_type_name = spec.get("type", "")
+        value_type = globals().get(value_type_name, str)
+        mapping = spec.get("mapping", {})
+        data = [Data.from_spec(data_spec) for data_spec in spec["data"]]
+        register_specs = [data_part.register_spec for data_part in data]
 
         return cls(
             value_type=value_type,
-            scale_factor=scale_factor,
             mapping=mapping,
             data=data,
+            register_specs=register_specs,
         )
 
-    def get_data(self, device: Device) -> bytes:
-        bytes_data = []
-        for data_part in self.data:
-            bytes_data.append(data_part.get_bytes(device))
+    def get_calculated_data(self, device: Device) -> list[RegisterDataT]:
+        return [data_part.calculate(device) for data_part in self.data]
 
-        return b"".join(bytes_data)
+    def calculate(self, device: Device) -> ValueTypeT:
+        """Calculate and return the represented value.
 
-    def get(self, device: Device) -> str:
-        """Obtain and return the represented value."""
-        data = self.get_data(device)
-        value = int(data)
-        scaled_value = value / self.scale_factor
-        mapped_value = self.mapping.get(scaled_value, scaled_value)
-        return str(mapped_value)
+        Use the cached data from the provided device's registers as input.
+        """
+        calculated_data: list[RegisterDataT] = self.get_calculated_data(device)
+        mapped_data = calculated_data
+        if self.mapping:
+            mapped_data = [
+                self.mapping.get(str(calculated_data_part), str(calculated_data_part))
+                for calculated_data_part in calculated_data
+            ]
+
+        if self.value_type == datetime:
+            int_data = [int(mapped_data_part) for mapped_data_part in mapped_data]
+            tzinfo = datetime.now().astimezone().tzinfo
+            timestamp = datetime(*int_data)  # type: ignore
+            return timestamp.replace(tzinfo=tzinfo)  # type: ignore
+
+        return self.value_type(*mapped_data)  # type: ignore
