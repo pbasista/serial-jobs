@@ -14,7 +14,7 @@ LOGGER = getLogger(__name__)
 
 def load_configuration(path: str = DEFAULT_CONFIG_PATH) -> dict:
     """Return the parsed configuration from file at the provided path."""
-    LOGGER.debug("loading configuration file %s", path)
+    LOGGER.info("loading configuration file %s", path)
 
     with open(path, encoding="utf-8") as input_file:
         content = input_file.read()
@@ -27,7 +27,7 @@ def load_configuration(path: str = DEFAULT_CONFIG_PATH) -> dict:
     else:
         raise ValueError("unsupported configuration file type")
 
-    LOGGER.debug("configuration file loaded")
+    LOGGER.info("configuration file loaded")
 
     return configuration
 

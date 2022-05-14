@@ -1,11 +1,12 @@
 """Base functionality related to communication with individual devices."""
 from __future__ import annotations
 
+from asyncio import Lock
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from logging import getLogger
-from typing import ClassVar, Iterable, Sequence, TypeVar
+from typing import ClassVar, Iterable, Optional, Sequence, TypeVar
 
 from ..specification import SpecMixin
 
@@ -55,6 +56,7 @@ class RegisterSpec:
 
 @dataclass(frozen=True)
 class Device(SpecMixin):
+    locks: ClassVar[dict[str, Lock]] = {}
     default_register_type: ClassVar[RegisterType] = RegisterType.DEFAULT
 
     specs_by_id: ClassVar[dict[str, dict]] = {}
@@ -62,6 +64,18 @@ class Device(SpecMixin):
     registers: dict[RegisterType, dict[int, bytes]] = field(
         default_factory=lambda: defaultdict(dict)
     )
+
+    lock: Optional[Lock] = None
+
+    @classmethod
+    def get_lock(cls: type[DeviceT], lock_id: str) -> Lock:
+        lock = cls.locks.get(lock_id)
+        if lock is None:
+            LOGGER.info("creating device lock %s", lock_id)
+            lock = Lock()
+            cls.locks[lock_id] = lock
+
+        return lock
 
     @classmethod
     def from_spec(cls: type[DeviceT], spec: dict) -> DeviceT:
@@ -110,7 +124,7 @@ class Device(SpecMixin):
 
         return bytes_read
 
-    def read_registers(self, register_specs: Sequence[RegisterSpec]) -> int:
+    async def read_registers(self, register_specs: Sequence[RegisterSpec]) -> int:
         """Read data from the specified registers.
 
         Return the number of bytes read.
@@ -121,18 +135,22 @@ class Device(SpecMixin):
                 register_spec.addresses
             )
 
+        if self.lock is None:
+            raise RuntimeError("lock is unavailable")
+
         bytes_read = 0
-        for register_type, register_addresses in register_specs_by_type.items():
-            address_ranges = get_ranges(register_addresses)
-            for address_range in address_ranges:
-                if len(address_range) == 1:
-                    bytes_read += self._read_register(
-                        address_range.start, register_type
-                    )
-                else:
-                    bytes_read += self._read_register_range(
-                        address_range.start, address_range.stop, register_type
-                    )
+        async with self.lock:
+            for register_type, register_addresses in register_specs_by_type.items():
+                address_ranges = get_ranges(register_addresses)
+                for address_range in address_ranges:
+                    if len(address_range) == 1:
+                        bytes_read += self._read_register(
+                            address_range.start, register_type
+                        )
+                    else:
+                        bytes_read += self._read_register_range(
+                            address_range.start, address_range.stop, register_type
+                        )
 
         return bytes_read
 

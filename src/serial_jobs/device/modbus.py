@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from logging import DEBUG, getLogger
 from struct import pack
-from typing import ClassVar, Union
+from typing import ClassVar, Optional, Union
 
 from minimalmodbus import Instrument, _serialports
 
@@ -32,7 +32,7 @@ class ModbusDevice(Device):
         RegisterType.INPUT: 4,
     }
 
-    instrument: Instrument = None
+    instrument: Optional[Instrument] = None
 
     @classmethod
     def from_spec(cls, spec: dict) -> ModbusDevice:
@@ -40,18 +40,23 @@ class ModbusDevice(Device):
         name = spec.get("name")
         serial_config = spec["serial"]
         protocol_config = spec["protocol"]
+        port = serial_config["port"]
+        lock = cls.get_lock(port)
         instrument = get_instrument(
-            serial_config["port"],
-            serial_config["baud_rate"],
-            serial_config["data_bits"],
-            serial_config["stop_bits"],
-            serial_config["parity"],
-            serial_config["timeout"],
-            protocol_config["modbus_address"],
+            port=port,
+            baud_rate=serial_config["baud_rate"],
+            data_bits=serial_config["data_bits"],
+            stop_bits=serial_config["stop_bits"],
+            parity=serial_config["parity"],
+            timeout=serial_config["timeout"],
+            modbus_address=protocol_config["modbus_address"],
         )
-        return cls(spec_id=device_id, name=name, instrument=instrument)
+        return cls(spec_id=device_id, name=name, lock=lock, instrument=instrument)
 
     def _read_register(self, address: int, register_type: RegisterType) -> int:
+        if self.instrument is None:
+            raise RuntimeError("instrument is unavailable")
+
         if register_type == register_type.DEFAULT:
             register_type = self.default_register_type
 
@@ -79,9 +84,12 @@ class ModbusDevice(Device):
         self.registers[register_type][address] = bytes_value
         return len(bytes_value)
 
-    def read_register_range(
+    def _read_register_range(
         self, start_address: int, stop_address: int, register_type: RegisterType
     ) -> int:
+        if self.instrument is None:
+            raise RuntimeError("instrument is unavailable")
+
         if register_type == register_type.DEFAULT:
             register_type = self.default_register_type
 

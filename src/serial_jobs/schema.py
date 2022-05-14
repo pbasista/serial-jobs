@@ -127,8 +127,8 @@ task_schema = Map(
         "id": Str(),
         Optional("name"): Str(),
         Optional("device"): Str(),
-        "mqtt_topic": Str(),
         Optional("mqtt_broker"): Str(),
+        "mqtt_topic": Str(),
         "value": value_schema,
     }
 )
@@ -139,10 +139,10 @@ job_schema = Map(
     {
         "id": Str(),
         Optional("name"): Str(),
+        Optional("enabled"): Bool(),
         Optional("mqtt_broker"): Str(),
         Optional("mqtt_messages"): Seq(MapPattern(Str(), MapPattern(Str(), Any()))),
         "sleep": Int(),
-        Optional("enabled"): Bool(),
         "tasks": UniqueSeq(Str()),
     }
 )

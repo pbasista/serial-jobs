@@ -21,8 +21,10 @@ class BMSDevice(Device):
         device_id = spec["id"]
         name = spec.get("name")
         serial_config = spec["serial"]
+        port = serial_config["port"]
+        lock = cls.get_lock(port)
         serial = Serial(
-            port=serial_config["port"],
+            port=port,
             baudrate=serial_config["baud_rate"],
             bytesize=serial_config["data_bits"],
             stopbits=serial_config["stop_bits"],
@@ -32,7 +34,7 @@ class BMSDevice(Device):
 
         serial.close()
 
-        return cls(spec_id=device_id, name=name, serial=serial)
+        return cls(spec_id=device_id, name=name, lock=lock, serial=serial)
 
     def query(self, request: bytes) -> bytes:
         """Send the provided request to the device and return its response."""

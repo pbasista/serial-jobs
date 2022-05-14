@@ -7,22 +7,11 @@ from json import dumps
 from logging import getLogger
 from typing import ClassVar
 
-from .mqtt import MQTTBroker
+from .mqtt import MQTTBroker, MQTTMessage
 from .specification import SpecMixin
 from .task import Task
 
 LOGGER = getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class MQTTMessage:
-    topic: str
-    payload: dict
-
-    @classmethod
-    def from_spec(cls, spec: dict) -> MQTTMessage:
-        topic, payload = next(iter(spec.items()))
-        return cls(topic, payload)
 
 
 @dataclass(frozen=True)
@@ -85,7 +74,7 @@ class Job(SpecMixin):
         """
         bytes_read = 0
         for task in self.tasks:
-            bytes_read += task.fetch_data()
+            bytes_read += await task.fetch_data()
 
         LOGGER.debug(
             "job %s: fetched %d bytes of data from the devices",
@@ -96,12 +85,15 @@ class Job(SpecMixin):
 
     async def connect_to_mqtt(self) -> None:
         """Connecto to the MQTT brokers used by the configured tasks."""
-        mqtt_brokers = [task.mqtt_broker for task in self.tasks]
+        mqtt_brokers_by_id = {
+            task.mqtt_broker.spec_id: task.mqtt_broker for task in self.tasks
+        }
         LOGGER.info(
-            "job %s: connecting to the configured MQTT brokers",
+            "job %s: connecting to %d configured MQTT brokers",
             self.spec_id,
+            len(mqtt_brokers_by_id),
         )
-        for mqtt_broker in mqtt_brokers:
+        for mqtt_broker in mqtt_brokers_by_id.values():
             await mqtt_broker.connect()
 
     async def send_messages(self) -> None:
@@ -128,7 +120,7 @@ class Job(SpecMixin):
                 mqtt_message.topic,
                 payload,
             )
-            self.mqtt_broker.publish(mqtt_message.topic, payload, retain=True)
+            await self.mqtt_broker.publish(mqtt_message.topic, payload, retain=True)
 
     async def perform_tasks(self, send_task_messages: bool = True) -> None:
         """Perform all the configured tasks."""

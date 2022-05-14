@@ -49,12 +49,12 @@ class Task(SpecMixin):
         """
         return self.device.clear_registers(self.value.register_specs)
 
-    def fetch_data(self) -> int:
+    async def fetch_data(self) -> int:
         """Fetch the data for this task from the configured device.
 
         Return the number of bytes read.
         """
-        return self.device.read_registers(self.value.register_specs)
+        return await self.device.read_registers(self.value.register_specs)
 
     async def perform(self, send_task_messages: bool = True) -> None:
         """Calculate specified value using data previously read from device."""
@@ -68,7 +68,7 @@ class Task(SpecMixin):
             calculated_value,
         )
         if send_task_messages:
-            self.mqtt_broker.publish(self.mqtt_topic, calculated_value)
+            await self.mqtt_broker.publish(self.mqtt_topic, calculated_value)
         else:
             LOGGER.warning(
                 "task %s: NOT publishing message to MQTT broker",
