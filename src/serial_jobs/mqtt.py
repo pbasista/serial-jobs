@@ -5,9 +5,9 @@ from asyncio import Lock
 from dataclasses import dataclass, field
 from functools import partial
 from logging import getLogger
-from typing import ClassVar, Optional
+from typing import Callable, ClassVar, Optional
 
-from gmqtt import Client
+from gmqtt import Client, Subscription
 from gmqtt.mqtt.constants import MQTTv311
 
 from .specification import SpecMixin
@@ -59,6 +59,12 @@ class MQTTClient:
         async with self.lock:
             self.client.publish(topic, value, retain=retain)
 
+    async def subscribe(self, topics: list[str], handler: Callable) -> None:
+        async with self.lock:
+            subscriptions = [Subscription(topic) for topic in topics]
+            self.client.subscribe(subscriptions)
+            self.client.on_message = handler
+
 
 @dataclass(frozen=True)
 class MQTTBroker(SpecMixin):
@@ -90,3 +96,6 @@ class MQTTBroker(SpecMixin):
 
     async def publish(self, topic: str, value: str, retain: bool = False) -> None:
         await self.mqtt_client.publish(topic, value, retain=retain)
+
+    async def subscribe(self, topics: list[str], handler: Callable) -> None:
+        await self.mqtt_client.subscribe(topics, handler)

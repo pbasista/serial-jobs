@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from logging import DEBUG, getLogger
-from struct import pack
+from struct import pack, unpack
 from typing import ClassVar, Optional, Union
 
 from minimalmodbus import Instrument, _serialports
@@ -17,8 +17,16 @@ def pack_byte(value: Union[bool, int]) -> bytes:
     return pack(">B", value)
 
 
+def unpack_byte(value: bytes) -> int:
+    return unpack(">B", value)[0]
+
+
 def pack_short(value: int) -> bytes:
     return pack(">H", value)
+
+
+def unpack_short(value: bytes) -> int:
+    return unpack(">H", value)[0]
 
 
 @dataclass(frozen=True)
@@ -31,8 +39,18 @@ class ModbusDevice(Device):
         RegisterType.HOLDING: 3,
         RegisterType.INPUT: 4,
     }
+    register_sizes: ClassVar[dict[RegisterType, int]] = {
+        RegisterType.COIL: 1,
+        RegisterType.DISCRETE: 1,
+        RegisterType.HOLDING: 2,
+        RegisterType.INPUT: 2,
+    }
 
     instrument: Optional[Instrument] = None
+
+    @classmethod
+    def get_register_size(cls, register_type: RegisterType) -> int:
+        return cls.register_sizes[register_type]
 
     @classmethod
     def from_spec(cls, spec: dict) -> ModbusDevice:
@@ -80,6 +98,8 @@ class ModbusDevice(Device):
                 address, functioncode=self.function_codes[register_type]
             )
             bytes_value = pack_short(int_value)
+        else:
+            raise RuntimeError(f"unsupported register type {register_type}")
 
         self.registers[register_type][address] = bytes_value
         return len(bytes_value)
@@ -94,7 +114,7 @@ class ModbusDevice(Device):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: reading from %s Modbus register block of addresses %d-%d",
+            "device %s: reading from %s Modbus register address range %d-%d",
             self.spec_id,
             register_type.name,
             start_address,
@@ -119,11 +139,73 @@ class ModbusDevice(Device):
                 functioncode=self.function_codes[register_type],
             )
             bytes_values = [pack_short(int_value) for int_value in int_values]
+        else:
+            raise RuntimeError(f"unsupported register type {register_type}")
 
         for address, bytes_value in zip(
             range(start_address, stop_address), bytes_values
         ):
             self.registers[register_type][address] = bytes_value
+
+        return len(bytes_values[0]) * len(bytes_values)
+
+    def _write_register(self, address: int, register_type: RegisterType) -> int:
+        if self.instrument is None:
+            raise RuntimeError("instrument is unavailable")
+
+        if register_type == register_type.DEFAULT:
+            register_type = self.default_register_type
+
+        LOGGER.debug(
+            "device %s: writing to %s Modbus register address %d",
+            self.spec_id,
+            register_type.name,
+            address,
+        )
+
+        bytes_value = self.registers[register_type][address]
+
+        if register_type == RegisterType.COIL:
+            int_value = unpack_byte(bytes_value)
+            self.instrument.write_bit(address, int_value)
+        elif register_type == RegisterType.HOLDING:
+            int_value = unpack_short(bytes_value)
+            self.instrument.write_register(address, int_value)
+        else:
+            raise RuntimeError(f"unsupported register type {register_type}")
+
+        return len(bytes_value)
+
+    def _write_register_range(
+        self, start_address: int, stop_address: int, register_type: RegisterType
+    ) -> int:
+        if self.instrument is None:
+            raise RuntimeError("instrument is unavailable")
+
+        if register_type == register_type.DEFAULT:
+            register_type = self.default_register_type
+
+        LOGGER.debug(
+            "device %s: writing to %s Modbus register address range %d-%d",
+            self.spec_id,
+            register_type.name,
+            start_address,
+            stop_address,
+        )
+
+        bytes_values = [
+            self.registers[register_type][address]
+            for address in range(start_address, stop_address)
+        ]
+
+        if register_type == RegisterType.COIL:
+            int_values = [unpack_byte(bytes_value) for bytes_value in bytes_values]
+            self.instrument.write_bits(start_address, int_values)
+        elif register_type == RegisterType.HOLDING:
+            int_values = [unpack_short(bytes_value) for bytes_value in bytes_values]
+            self.instrument.write_registers(start_address, int_values)
+        else:
+            raise RuntimeError(f"unsupported register type {register_type}")
 
         return len(bytes_values[0]) * len(bytes_values)
 

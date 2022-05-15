@@ -4,8 +4,10 @@ from logging import INFO, Logger, basicConfig, getLogger
 
 from .config import DEFAULT_CONFIG_PATH, load_configuration
 from .device import Device
+from .handler import Handler
 from .job import Job
 from .mqtt import MQTTBroker
+from .service import Service
 from .task import Task
 
 # copied over from logging._nameToLevel
@@ -35,10 +37,12 @@ def configure_logging(level=INFO) -> Logger:
     return getLogger(__name__)
 
 
+# pylint: disable-next=too-many-arguments
 async def work(
     configuration_path: str = DEFAULT_CONFIG_PATH,
     logging_level: int = INFO,
     keep_going: bool = False,
+    write_to_device: bool = True,
     send_initial_messages: bool = True,
     send_task_messages: bool = True,
 ) -> None:
@@ -51,11 +55,21 @@ async def work(
     Device.load_specifications(config["devices"])
     Task.load_specifications(config["tasks"])
     Job.load_specifications(config["jobs"])
+    Handler.load_specifications(config["handlers"])
+    Service.load_specifications(config["services"])
     logger.debug("specifications loaded")
 
     awaitable_jobs = [
         job.carry_out(keep_going, send_initial_messages, send_task_messages)
         for job in Job.from_all_specs()
     ]
-    logger.info("carrying out %d jobs", len(awaitable_jobs))
-    await gather(*awaitable_jobs)
+    awaitable_services = [
+        service.provide(keep_going, write_to_device, send_initial_messages)
+        for service in Service.from_all_specs()
+    ]
+    logger.info(
+        "carrying out %d jobs and providing %d services",
+        len(awaitable_jobs),
+        len(awaitable_services),
+    )
+    await gather(*awaitable_jobs, *awaitable_services)

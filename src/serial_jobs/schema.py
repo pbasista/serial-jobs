@@ -87,11 +87,19 @@ device_schema = Map(
 
 devices_schema = Seq(device_schema)
 
+writable_block_schema = Map(
+    {
+        "start_address": HexInt(),
+        "stop_address": HexInt(),
+    }
+)
+
 register_schema = Map(
     {
         Optional("register_type", default="default"): Enum(
             ("default", "coil", "discrete", "holding", "input")
         ),
+        Optional("writable_block"): writable_block_schema,
         Optional("register_count", default=1): Int(),
         "address": HexInt(),
         Optional("byte_order"): Seq(Int()),
@@ -116,7 +124,7 @@ data_schema = Seq(data_part_schema)
 
 value_schema = Map(
     {
-        Optional("type"): Enum(("date", "datetime", "time")),
+        Optional("type"): Enum(("float", "int", "str", "date", "datetime", "time")),
         Optional("mapping"): MapPattern(Str(), Str()),
         "data": data_schema,
     }
@@ -149,11 +157,46 @@ job_schema = Map(
 
 jobs_schema = Seq(job_schema)
 
+input_value_schema = Map(
+    {
+        Optional("mapping"): MapPattern(Str(), Str()),
+        Optional("type"): Enum(("float", "int", "str")),
+        "data": data_schema,
+    }
+)
+
+handler_schema = Map(
+    {
+        "id": Str(),
+        Optional("name"): Str(),
+        Optional("device"): Str(),
+        "mqtt_topic": Str(),
+        "value": input_value_schema,
+    }
+)
+
+handlers_schema = Seq(handler_schema)
+
+service_schema = Map(
+    {
+        "id": Str(),
+        Optional("name"): Str(),
+        Optional("enabled"): Bool(),
+        Optional("mqtt_broker"): Str(),
+        Optional("mqtt_messages"): Seq(MapPattern(Str(), MapPattern(Str(), Any()))),
+        "handlers": UniqueSeq(Str()),
+    }
+)
+
+services_schema = Seq(service_schema)
+
 schema = Map(
     {
         "mqtt_brokers": mqtt_brokers_schema,
         "devices": devices_schema,
         "tasks": tasks_schema,
         "jobs": jobs_schema,
+        "handlers": handlers_schema,
+        "services": services_schema,
     }
 )

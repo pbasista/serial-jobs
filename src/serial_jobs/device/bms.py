@@ -13,6 +13,7 @@ LOGGER = getLogger(__name__)
 
 
 @dataclass(frozen=True)
+# pylint: disable-next=abstract-method
 class BMSDevice(Device):
     serial: Serial = None
 

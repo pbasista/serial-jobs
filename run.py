@@ -22,7 +22,13 @@ def parse_arguments() -> Namespace:
     parser.add_argument(
         "--keep-going",
         action="store_true",
-        help="keep carrying out a job after exception",
+        help="keep carrying out a job or providing a service after exception",
+    )
+    parser.add_argument(
+        "--no-handler-writes",
+        action="store_false",
+        dest="write_to_device",
+        help="do not write to any device registers from within handlers",
     )
     parser.add_argument(
         "--no-initial-messages",
@@ -47,6 +53,7 @@ def do_work():
             namespace.config_path,
             getLevelName(namespace.logging_level),
             namespace.keep_going,
+            namespace.write_to_device,
             namespace.send_initial_messages,
             namespace.send_task_messages,
         )

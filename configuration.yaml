@@ -17,6 +17,17 @@ devices:
       timeout: 0.05
     protocol:
       modbus_address: 0x11
+  - id: epever-xtra-4415n-relaxed-timeout
+    name: EPEVER XTRA 4415N MPPT solar charge controller
+    serial:
+      port: /dev/ttyUSB0
+      baud_rate: 115200
+      data_bits: 8
+      stop_bits: 1
+      parity: N
+      timeout: 0.15
+    protocol:
+      modbus_address: 0x11
   - id: jbd-sp04s034-l4s-200
     name: JBD SP04S034 L4S 200A B U R H battery management system
     type: BMSDevice
@@ -1174,6 +1185,17 @@ jobs:
           state_topic: epever-xtra-4415n/charging-device-on
           object_id: epever-xtra-4415n-charging-device-on
           unique_id: epever-xtra-4415n-charging-device-on
+      - homeassistant/sensor/default/charge-controller-battery-float-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Float Voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-float-voltage
+          object_id: epever-xtra-4415n-battery-float-voltage
+          unique_id: epever-xtra-4415n-battery-float-voltage
+          unit_of_measurement: V
     sleep: 60
     tasks:
       - e-battery-temperature
@@ -1190,6 +1212,7 @@ jobs:
       - e-ambient-temperature
       - e-battery-impedance
       - e-charging-device-on
+      - e-battery-float-voltage
   - id: charge-controller-important
     mqtt_messages:
       - homeassistant/sensor/default/charge-controller-solar-voltage/config:
@@ -1602,3 +1625,100 @@ jobs:
       - o-power-factor
       - o-voltage
       - o-current
+
+handlers:
+  - id: e-battery-equalization-voltage-set
+    device: epever-xtra-4415n-relaxed-timeout
+    mqtt_topic: epever-xtra-4415n/battery-equalization-voltage/set
+    value:
+      type: float
+      data:
+        - short:
+            register_type: holding
+            writable_block:
+              start_address: 0x9003
+              stop_address: 0x900F
+            address: 0x9006
+            scale_factor: 100
+  - id: e-battery-boost-voltage-set
+    device: epever-xtra-4415n-relaxed-timeout
+    mqtt_topic: epever-xtra-4415n/battery-boost-voltage/set
+    value:
+      type: float
+      data:
+        - short:
+            register_type: holding
+            writable_block:
+              start_address: 0x9003
+              stop_address: 0x900F
+            address: 0x9007
+            scale_factor: 100
+  - id: e-battery-float-voltage-set
+    device: epever-xtra-4415n-relaxed-timeout
+    mqtt_topic: epever-xtra-4415n/battery-float-voltage/set
+    value:
+      type: float
+      data:
+        - short:
+            register_type: holding
+            writable_block:
+              start_address: 0x9003
+              stop_address: 0x900F
+            address: 0x9008
+            scale_factor: 100
+
+services:
+  - id: charge-controller-voltages
+    mqtt_messages:
+      - homeassistant/number/default/charge-controller-battery-equalization-voltage/config:
+          device:
+            name: EPEVER solar charge controller
+            manufacturer: EPEVER
+            model: XTRA 4415N
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Equalization Voltage
+          min: 12
+          max: 14.6
+          step: 0.01
+          state_class: measurement
+          command_topic: epever-xtra-4415n/battery-equalization-voltage/set
+          state_topic: epever-xtra-4415n/battery-equalization-voltage
+          object_id: epever-xtra-4415n-battery-equalization-voltage
+          unique_id: epever-xtra-4415n-battery-equalization-voltage
+          unit_of_measurement: V
+      - homeassistant/number/default/charge-controller-battery-boost-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Boost Voltage
+          min: 12
+          max: 14.6
+          step: 0.01
+          state_class: measurement
+          command_topic: epever-xtra-4415n/battery-boost-voltage/set
+          state_topic: epever-xtra-4415n/battery-boost-voltage
+          object_id: epever-xtra-4415n-battery-boost-voltage
+          unique_id: epever-xtra-4415n-battery-boost-voltage
+          unit_of_measurement: V
+      - homeassistant/number/default/charge-controller-battery-float-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: voltage
+          entity_category: config
+          name: Battery Float Voltage
+          min: 12
+          max: 14.6
+          step: 0.01
+          state_class: measurement
+          command_topic: epever-xtra-4415n/battery-float-voltage/set
+          state_topic: epever-xtra-4415n/battery-float-voltage
+          object_id: epever-xtra-4415n-battery-float-voltage
+          unique_id: epever-xtra-4415n-battery-float-voltage
+          unit_of_measurement: V
+    handlers:
+      - e-battery-equalization-voltage-set
+      - e-battery-boost-voltage-set
+      - e-battery-float-voltage-set
