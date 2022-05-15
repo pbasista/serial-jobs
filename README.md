@@ -29,7 +29,7 @@ This section explains the terminology used within the configuration file.
 
 1. An _mqtt_broker_ specifies how to communicate with an MQTT broker.
 1. A _device_ specifies how to communicate with a serial device.
-1. A _data_ specifies how map raw bytes from device to a simple data part usable for obtaining a _value_.
+1. A _data_ specifies how to map raw bytes from device to a simple data part usable for obtaining a _value_.
 1. A _value_ specifies how to map simple _data_ parts provided by device to a value usable in practice.
 
 ### Reading from devices
