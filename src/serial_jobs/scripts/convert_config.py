@@ -7,24 +7,27 @@ from serial_jobs import (
     DEFAULT_JSON_CONFIG_PATH,
     LOGGING_LEVELS,
     configure_logging,
-    convert_configuration,
     load_configuration,
+    save_configuration,
 )
 
 
 def parse_arguments() -> Namespace:
     parser = ArgumentParser(
-        description="Validate YAML configuration and convert it to JSON format."
+        description=(
+            "Load configuration from file and save it to different file. "
+            "Optionally convert between YAML and JSON formats."
+        )
     )
     parser.add_argument(
-        "--yaml-config-path",
+        "--input-config-path",
         default=DEFAULT_CONFIG_PATH,
-        help="path to the input YAML configuration file (default: %(default)s)",
+        help="path to the input configuration file (default: %(default)s)",
     )
     parser.add_argument(
-        "--json-config-path",
+        "--output-config-path",
         default=DEFAULT_JSON_CONFIG_PATH,
-        help="path to the output JSON configuration file (default: %(default)s)",
+        help="path to the output configuration file (default: %(default)s)",
     )
     parser.add_argument(
         "--logging-level",
@@ -41,8 +44,8 @@ def validate_and_convert() -> None:
     logging_level = getLevelName(namespace.logging_level)
     configure_logging(logging_level)
 
-    configuration = load_configuration(namespace.yaml_config_path)
-    convert_configuration(configuration, namespace.json_config_path)
+    configuration = load_configuration(namespace.input_config_path)
+    save_configuration(configuration, namespace.output_config_path)
 
 
 if __name__ == "__main__":

@@ -190,7 +190,18 @@ service_schema = Map(
 
 services_schema = Seq(service_schema)
 
-schema = Map(
+configuration_stub_schema = Map(
+    {
+        Optional("mqtt_brokers"): mqtt_brokers_schema,
+        Optional("devices"): devices_schema,
+        Optional("tasks"): tasks_schema,
+        Optional("jobs"): jobs_schema,
+        Optional("handlers"): handlers_schema,
+        Optional("services"): services_schema,
+    }
+)
+
+configuration_schema = Map(
     {
         "mqtt_brokers": mqtt_brokers_schema,
         "devices": devices_schema,

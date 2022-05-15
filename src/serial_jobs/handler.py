@@ -1,4 +1,5 @@
 """Functionality related to handlers."""
+# pylint: disable-next=duplicate-code
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,6 +26,7 @@ class Handler(SpecMixin):
         handler_id = spec["id"]
         name = spec.get("name")
         mqtt_topic = spec["mqtt_topic"]
+        # pylint: disable-next=duplicate-code
         device_id = spec.get("device", Device.default_id())
         device = Device.from_id(device_id)
         value_spec = spec["value"]
@@ -37,6 +39,7 @@ class Handler(SpecMixin):
             value=value,
         )
 
+    # pylint: disable-next=duplicate-code
     def clear_data(self) -> int:
         """Clear the data for this handler on the configured device.
 

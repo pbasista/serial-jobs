@@ -1,0 +1,259 @@
+devices:
+  - id: orno-or-we-514
+    name: ORNO OR-WE-514 single phase energy meter
+    serial:
+      port: /dev/ttyUSB0
+      baud_rate: 9600
+      data_bits: 8
+      stop_bits: 1
+      parity: E
+      timeout: 0.1
+    protocol:
+      modbus_address: 0x13
+
+tasks:
+  - id: o-frequency
+    name: power frequency in Hz
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/frequency
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x130
+            scale_factor: 100
+  - id: o-voltage
+    name: voltage in V
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/voltage
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x131
+            scale_factor: 100
+  - id: o-current
+    name: current in A
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/current
+    value:
+      data:
+        - long:
+            register_type: holding
+            register_count: 2
+            address: 0x139
+            scale_factor: 1000
+  - id: o-active-power
+    name: active power in W
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/active-power
+    value:
+      data:
+        - signed_long:
+            register_type: holding
+            register_count: 2
+            address: 0x140
+  - id: o-reactive-power
+    name: reactive power in var
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/reactive-power
+    value:
+      data:
+        - signed_long:
+            register_type: holding
+            register_count: 2
+            address: 0x148
+  - id: o-apparent-power
+    name: apparent power in VA
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/apparent-power
+    value:
+      data:
+        - signed_long:
+            register_type: holding
+            register_count: 2
+            address: 0x150
+  - id: o-power-factor
+    name: "power factor in %"
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/power-factor
+    value:
+      data:
+        - signed_short:
+            register_type: holding
+            address: 0x158
+            scale_factor: 10
+  - id: o-active-energy
+    name: consumed active energy in kWh
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/active-energy
+    value:
+      data:
+        - long:
+            register_type: holding
+            register_count: 2
+            address: 0xA000
+            scale_factor: 100
+  - id: o-reactive-energy
+    name: consumed reactive energy in kvarh
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/reactive-energy
+    value:
+      data:
+        - long:
+            register_type: holding
+            register_count: 2
+            address: 0xA01E
+            scale_factor: 100
+  - id: o-datetime
+    name: current date and time
+    device: orno-or-we-514
+    mqtt_topic: datetime
+    value:
+      type: datetime
+      data:
+        - byte:
+            register_type: holding
+            address: 0x8120
+            byte_index: 0
+            increase_by: 2000
+        - byte:
+            register_type: holding
+            address: 0x8120
+            byte_index: 1
+        - byte:
+            register_type: holding
+            address: 0x8121
+            byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x8121
+            byte_index: 1
+        - byte:
+            register_type: holding
+            address: 0x8122
+            byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x8122
+            byte_index: 1
+
+jobs:
+  - id: power-meter-datetime
+    sleep: 1000
+    enabled: false  # device does not seem to support it
+    tasks:
+      - o-datetime
+  - id: power-meter
+    mqtt_messages:
+      - homeassistant/sensor/default/power-meter-active-energy/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          device_class: energy
+          name: Active Energy
+          state_class: total_increasing
+          state_topic: orno-or-we-514/active-energy
+          object_id: orno-or-we-514-active-energy
+          unique_id: orno-or-we-514-active-energy
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/power-meter-reactive-energy/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: energy
+          name: Reactive Energy
+          state_class: total_increasing
+          state_topic: orno-or-we-514/reactive-energy
+          object_id: orno-or-we-514-reactive-energy
+          unique_id: orno-or-we-514-reactive-energy
+          unit_of_measurement: kvarh
+      - homeassistant/sensor/default/power-meter-frequency/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: frequency
+          name: Power frequency
+          state_class: measurement
+          state_topic: orno-or-we-514/frequency
+          object_id: orno-or-we-514-frequency
+          unique_id: orno-or-we-514-frequency
+          unit_of_measurement: Hz
+    sleep: 60
+    tasks:
+      - o-active-energy
+      - o-reactive-energy
+      - o-frequency
+  - id: power-meter-important
+    mqtt_messages:
+      - homeassistant/sensor/default/power-meter-active-power/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          device_class: power
+          name: Active Power
+          state_class: measurement
+          state_topic: orno-or-we-514/active-power
+          object_id: orno-or-we-514-active-power
+          unique_id: orno-or-we-514-active-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/power-meter-reactive-power/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: reactive_power
+          name: Reactive Power
+          state_class: measurement
+          state_topic: orno-or-we-514/reactive-power
+          object_id: orno-or-we-514-reactive-power
+          unique_id: orno-or-we-514-reactive-power
+          unit_of_measurement: var
+      - homeassistant/sensor/default/power-meter-apparent-power/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: apparent_power
+          name: Apparent Power
+          state_class: measurement
+          state_topic: orno-or-we-514/apparent-power
+          object_id: orno-or-we-514-apparent-power
+          unique_id: orno-or-we-514-apparent-power
+          unit_of_measurement: VA
+      - homeassistant/sensor/default/power-meter-power-factor/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: power_factor
+          name: Power Factor
+          state_class: measurement
+          state_topic: orno-or-we-514/power-factor
+          object_id: orno-or-we-514-power-factor
+          unique_id: orno-or-we-514-power-factor
+          unit_of_measurement: "%"
+      - homeassistant/sensor/default/power-meter-voltage/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: voltage
+          name: Voltage
+          state_class: measurement
+          state_topic: orno-or-we-514/voltage
+          object_id: orno-or-we-514-voltage
+          unique_id: orno-or-we-514-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/power-meter-current/config:
+          device:
+            identifiers: orno-or-we-514
+          device_class: current
+          name: Current
+          state_class: measurement
+          state_topic: orno-or-we-514/current
+          object_id: orno-or-we-514-current
+          unique_id: orno-or-we-514-current
+          unit_of_measurement: A
+    sleep: 10
+    tasks:
+      - o-active-power
+      - o-reactive-power
+      - o-apparent-power
+      - o-power-factor
+      - o-voltage
+      - o-current

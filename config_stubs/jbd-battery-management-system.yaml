@@ -1,0 +1,385 @@
+devices:
+  - id: jbd-sp04s034-l4s-200
+    name: JBD SP04S034 L4S 200A B U R H battery management system
+    type: BMSDevice
+    serial:
+      port: /dev/ttyUSB0
+      baud_rate: 9600
+      data_bits: 8
+      stop_bits: 1
+      parity: N
+      timeout: 0.1
+
+tasks:
+  - id: j-battery-voltage
+    name: battery voltage in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-voltage
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-net-current
+    name: battery net current in A
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-net-current
+    value:
+      data:
+        - signed_short:
+            address: 0x03
+            byte_offset: 2
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-electric-charge
+    name: battery electric charge in Ah
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-electric-charge
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 4
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-nominal-electric-charge
+    name: battery nominal electric charge in Ah
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-nominal-electric-charge
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 6
+            byte_count: 2
+            scale_factor: 100
+  - id: j-battery-number-of-cycles
+    name: number of battery cycles
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-number-of-cycles
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 8
+            byte_count: 2
+  - id: j-battery-soc
+    name: "battery state of charge in %"
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-soc
+    value:
+      data:
+        - byte:
+            address: 0x03
+            byte_offset: 19
+            byte_count: 1
+  - id: j-battery-number-of-cells
+    name: number of battery cells
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/battery-number-of-cells
+    value:
+      data:
+        - byte:
+            address: 0x03
+            byte_offset: 21
+            byte_count: 1
+  - id: j-number-of-temperature-sensors
+    name: number of temperature sensors
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/number-of-temperature-sensors
+    value:
+      data:
+        - byte:
+            address: 0x03
+            byte_offset: 22
+            byte_count: 1
+  - id: j-temperature-1
+    name: temperature of the first sensor in degrees Celsius
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/temperature-1
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 23
+            byte_count: 2
+            increase_by: -2731  # Kelvin to Celsius
+            scale_factor: 10
+  - id: j-temperature-2
+    name: temperature of the second sensor in degrees Celsius
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/temperature-2
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 25
+            byte_count: 2
+            increase_by: -2731  # Kelvin to Celsius
+            scale_factor: 10
+  - id: j-temperature-3
+    name: temperature of the third sensor in degrees Celsius
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/temperature-3
+    value:
+      data:
+        - short:
+            address: 0x03
+            byte_offset: 27
+            byte_count: 2
+            increase_by: -2731  # Kelvin to Celsius
+            scale_factor: 10
+  - id: j-cell-1-voltage
+    name: voltage of cell 1 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-1-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 0
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-cell-2-voltage
+    name: voltage of cell 2 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-2-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 2
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-cell-3-voltage
+    name: voltage of cell 3 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-3-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 4
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-cell-4-voltage
+    name: voltage of cell 4 in V
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/cell-4-voltage
+    value:
+      data:
+        - short:
+            address: 0x04
+            byte_offset: 6
+            byte_count: 2
+            scale_factor: 1000
+  - id: j-hardware-revision
+    name: hardware revision of the device
+    device: jbd-sp04s034-l4s-200
+    mqtt_topic: jbd-sp04s034-l4s-200/hardware-revision
+    value:
+      data:
+        - string:
+            address: 0x05
+
+jobs:
+  - id: battery-management-system-diagnostic
+    mqtt_messages:
+      - homeassistant/sensor/default/bms-battery-nominal-electric-charge/config:
+          device:
+            name: JBD battery management system
+            manufacturer: JBD
+            model: SP04S034 L4S 200A B U R H
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Battery Nominal Electric Charge
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-nominal-electric-charge
+          object_id: jbd-sp04s034-l4s-200-battery-nominal-electric-charge
+          unique_id: jbd-sp04s034-l4s-200-battery-nominal-electric-charge
+          unit_of_measurement: Ah
+      - homeassistant/sensor/default/bms-battery-number-of-cycles/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Number of Cycles
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-number-of-cycles
+          object_id: jbd-sp04s034-l4s-200-battery-number-of-cycles
+          unique_id: jbd-sp04s034-l4s-200-battery-number-of-cycles
+      - homeassistant/sensor/default/bms-battery-number-of-cells/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Number of Cells
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-number-of-cells
+          object_id: jbd-sp04s034-l4s-200-battery-number-of-cells
+          unique_id: jbd-sp04s034-l4s-200-battery-number-of-cells
+      - homeassistant/sensor/default/bms-number-of-temperature-sensors/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Number of Temperature Sensors
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/number-of-temperature-sensors
+          object_id: jbd-sp04s034-l4s-200-number-of-temperature-sensors
+          unique_id: jbd-sp04s034-l4s-200-number-of-temperature-sensors
+      - homeassistant/sensor/default/bms-hardware-revision/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          entity_category: diagnostic
+          name: Hardware Revision
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/hardware-revision
+          object_id: jbd-sp04s034-l4s-200-hardware-revision
+          unique_id: jbd-sp04s034-l4s-200-hardware-revision
+    sleep: 1000
+    tasks:
+      - j-battery-nominal-electric-charge
+      - j-battery-number-of-cycles
+      - j-battery-number-of-cells
+      - j-number-of-temperature-sensors
+      - j-hardware-revision
+  - id: battery-management-system
+    mqtt_messages:
+      - homeassistant/sensor/default/temperature-1/config:
+          device:
+            name: JBD battery management system
+            manufacturer: JBD
+            model: SP04S034 L4S 200A B U R H
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: temperature
+          entity_category: diagnostic
+          name: Temperature 1
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/temperature-1
+          object_id: jbd-sp04s034-l4s-200-temperature-1
+          unique_id: jbd-sp04s034-l4s-200-temperature-1
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/temperature-2/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: temperature
+          entity_category: diagnostic
+          name: Temperature 2
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/temperature-2
+          object_id: jbd-sp04s034-l4s-200-temperature-2
+          unique_id: jbd-sp04s034-l4s-200-temperature-2
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/temperature-3/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: temperature
+          entity_category: diagnostic
+          name: Temperature 3
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/temperature-3
+          object_id: jbd-sp04s034-l4s-200-temperature-3
+          unique_id: jbd-sp04s034-l4s-200-temperature-3
+          unit_of_measurement: °C
+      - homeassistant/sensor/default/cell-1-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 1 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-1-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-1-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-1-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/cell-2-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 2 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-2-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-2-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-2-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/cell-3-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 3 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-3-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-3-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-3-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/cell-4-voltage/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          entity_category: diagnostic
+          name: Cell 4 Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/cell-4-voltage
+          object_id: jbd-sp04s034-l4s-200-cell-4-voltage
+          unique_id: jbd-sp04s034-l4s-200-cell-4-voltage
+          unit_of_measurement: V
+    sleep: 60
+    tasks:
+      - j-temperature-1
+      - j-temperature-2
+      - j-temperature-3
+      - j-cell-1-voltage
+      - j-cell-2-voltage
+      - j-cell-3-voltage
+      - j-cell-4-voltage
+  - id: battery-management-system-important
+    mqtt_messages:
+      - homeassistant/sensor/default/bms-battery-voltage/config:
+          device:
+            name: JBD battery management system
+            manufacturer: JBD
+            model: SP04S034 L4S 200A B U R H
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: voltage
+          name: Battery Voltage
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-voltage
+          object_id: jbd-sp04s034-l4s-200-battery-voltage
+          unique_id: jbd-sp04s034-l4s-200-battery-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/bms-battery-net-current/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: current
+          name: Battery Net Current
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-net-current
+          object_id: jbd-sp04s034-l4s-200-battery-net-current
+          unique_id: jbd-sp04s034-l4s-200-battery-net-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/bms-battery-electric-charge/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          name: Battery Electric Charge
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-electric-charge
+          object_id: jbd-sp04s034-l4s-200-battery-electric-charge
+          unique_id: jbd-sp04s034-l4s-200-battery-electric-charge
+          unit_of_measurement: Ah
+      - homeassistant/sensor/default/bms-battery-soc/config:
+          device:
+            identifiers: jbd-sp04s034-l4s-200
+          device_class: battery
+          name: Battery State of Charge
+          state_class: measurement
+          state_topic: jbd-sp04s034-l4s-200/battery-soc
+          object_id: jbd-sp04s034-l4s-200-battery-soc
+          unique_id: jbd-sp04s034-l4s-200-battery-soc
+          unit_of_measurement: "%"
+    sleep: 10
+    tasks:
+      - j-battery-voltage
+      - j-battery-net-current
+      - j-battery-electric-charge
+      - j-battery-soc
