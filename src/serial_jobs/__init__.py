@@ -10,4 +10,4 @@ from .config import (
 from .main import LOGGING_LEVELS, configure_logging, work
 from .schema import configuration_schema
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
