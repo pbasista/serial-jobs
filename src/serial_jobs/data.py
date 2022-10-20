@@ -38,8 +38,8 @@ class Data:
     byte_count: Optional[int]
     bitmask: Optional[int]
     bitshift: Optional[int]
-    scale_factor: Optional[int]
     increase_by: Optional[int]
+    scale_factor: Optional[int]
 
     @classmethod
     # pylint: disable-next=too-many-locals
@@ -79,8 +79,8 @@ class Data:
             byte_count = 1
         bitmask = data_part_spec.get("bitmask")
         bitshift = data_part_spec.get("bitshift")
-        scale_factor = data_part_spec.get("scale_factor")
         increase_by = data_part_spec.get("increase_by")
+        scale_factor = data_part_spec.get("scale_factor")
 
         return cls(
             unpack_type=unpack_type,
@@ -91,8 +91,8 @@ class Data:
             byte_count=byte_count,
             bitmask=bitmask,
             bitshift=bitshift,
-            scale_factor=scale_factor,
             increase_by=increase_by,
+            scale_factor=scale_factor,
         )
 
     def unpack(self, register_bytes: bytes) -> RegisterDataT:

@@ -108,8 +108,8 @@ register_schema = Map(
         Optional("byte_index"): Int(),  # if defined, overrides offset and count
         Optional("bitmask"): BinInt(),
         Optional("bitshift"): Int(),  # if positive, shift to the right
-        Optional("scale_factor"): Int(),
         Optional("increase_by"): Int(),
+        Optional("scale_factor"): Int(),
     }
 )
 
