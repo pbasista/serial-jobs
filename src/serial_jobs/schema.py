@@ -26,7 +26,7 @@ class YAMLSerializationError(ValueError):
 
 def is_binary(value: str) -> bool:
     """Return true if the provided value is a string of a binary integer."""
-    return re_compile(r"^0[bB]+[01]+$").match(value) is not None
+    return re_compile(r"^0[bB][01]+$").match(value) is not None
 
 
 class BinInt(ScalarValidator):
