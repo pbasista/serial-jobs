@@ -8,7 +8,7 @@ from strictyaml.ruamel.comments import CommentedMap
 
 from .schema import configuration_schema, configuration_stub_schema
 
-DEFAULT_CONFIG_PATH = "./configuration.yaml"
+DEFAULT_CONFIG_PATH = "./configuration.json"
 DEFAULT_JSON_CONFIG_PATH = DEFAULT_CONFIG_PATH.rsplit(".", maxsplit=1)[0] + ".json"
 LOGGER = getLogger(__name__)
 
