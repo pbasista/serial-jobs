@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from logging import getLogger
 from struct import pack
+from time import sleep
 
 from serial import Serial
 
@@ -66,7 +67,10 @@ class BMSDevice(Device):
         response = bytearray()
 
         attempts = 0
+        response.extend(self.serial.read(4))
+
         while len(response) < 4 and attempts < 3:
+            sleep(0.5)
             response.extend(self.serial.read(4))
             attempts += 1
 
