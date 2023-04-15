@@ -1,3 +1,6 @@
+# Datasheet: Register description OR-WE-514&OR-WE-515,
+# available at: https://github.com/gituser-rk/orno-modbus-mqtt/blob/master/Register%20description%20OR-WE-514%26OR-WE-515.pdf
+
 devices:
   - id: orno-or-we-514
     name: ORNO OR-WE-514 single phase energy meter
@@ -9,9 +12,225 @@ devices:
       parity: E
       timeout: 0.1
     protocol:
-      modbus_address: 0x13
+      modbus_address: 0x1
 
 tasks:
+  - id: o-modbus-address
+    name: Modbus address
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/modbus-address
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x110
+  - id: o-baud-rate
+    name: Baud rate
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/baud-rate
+    value:
+      mapping:
+        1: 1200
+        2: 2400
+        3: 4800
+        4: 9600
+      data:
+        - byte:
+            register_type: holding
+            address: 0x111
+            byte_index: 1
+  - id: o-display-active-energy
+    name: display active energy
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-active-energy
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00000001
+  - id: o-display-reactive-energy
+    name: display reactive energy
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-reactive-energy
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00000010
+            bitshift: 1
+  - id: o-display-voltage
+    name: display voltage
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-voltage
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00000100
+            bitshift: 2
+  - id: o-display-current
+    name: display current
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-current
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00001000
+            bitshift: 3
+  - id: o-display-active-power
+    name: display active power
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-active-power
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00010000
+            bitshift: 4
+  - id: o-display-reactive-power
+    name: display reactive power
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-reactive-power
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00100000
+            bitshift: 5
+  - id: o-display-apparent-power
+    name: display apparent power
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-apparent-power
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b01000000
+            bitshift: 6
+  - id: o-display-power-factor
+    name: display power factor
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-power-factor
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b10000000
+            bitshift: 7
+  - id: o-measurement-mode
+    name: measurement mode
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/measurement-mode
+    value:
+      mapping:
+        0: active forward and reverse
+        1: active and reactive
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 1
+  - id: o-display-digits
+    name: display digits
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-digits
+    value:
+      mapping:
+        0: 6 + 0
+        1: 5 + 1
+        2: 4 + 2
+      data:
+        - byte:
+            register_type: holding
+            address: 0x113
+            byte_index: 0
+  - id: o-display-change-time
+    name: display change time
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-change-time
+    value:
+      data:
+        - byte:
+            register_type: holding
+            address: 0x113
+            byte_index: 1
+  - id: o-tariff-setup
+    name: tariff setup
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/tariff-setup
+    value:
+      mapping:
+        0: not allowed
+        1: allowed
+      data:
+        - byte:
+            register_type: holding
+            address: 0x114
+            byte_index: 0
+  - id: o-pulse-output-type
+    name: pulse output type
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/pulse-output-type
+    value:
+      mapping:
+        0: active
+        1: reactive
+        2: second impulse
+      data:
+        - byte:
+            register_type: holding
+            address: 0x114
+            byte_index: 1
+  - id: o-impulse-constant
+    name: impulse constant
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/impulse-constant
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x118
   - id: o-frequency
     name: power frequency in Hz
     device: orno-or-we-514
@@ -108,7 +327,7 @@ tasks:
   - id: o-datetime
     name: current date and time
     device: orno-or-we-514
-    mqtt_topic: datetime
+    mqtt_topic: orno-or-we-514/datetime
     value:
       type: datetime
       data:
@@ -140,8 +359,36 @@ tasks:
 
 jobs:
   - id: power-meter-datetime
-    sleep: 1000
-    enabled: false  # device does not seem to support it
+    mqtt_messages:
+      - homeassistant/text/default/power-meter-datetime/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          device_class: timestamp
+          state_class: measurement
+          name: Device date and time
+          command_topic: orno-or-we-514/datetime/set
+          state_topic: orno-or-we-514/datetime
+          object_id: orno-or-we-514-datetime-configurable
+          unique_id: orno-or-we-514-datetime-configurable
+      - homeassistant/sensor/default/power-meter-datetime/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: diagnostic
+          device_class: timestamp
+          state_class: measurement
+          name: Device date and time
+          state_topic: orno-or-we-514/datetime
+          object_id: orno-or-we-514-datetime
+          unique_id: orno-or-we-514-datetime
+    sleep: 60
+    enabled: false  # datetime can be set via handler but the device seems to *not* advance it further as the time passes
     tasks:
       - o-datetime
   - id: power-meter
@@ -257,3 +504,525 @@ jobs:
       - o-power-factor
       - o-voltage
       - o-current
+  - id: power-meter-diagnostics
+    mqtt_messages:
+      - homeassistant/number/default/power-meter-modbus-address/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Modbus Address
+          min: 1
+          max: 247
+          mode: box
+          enabled_by_default: false
+          command_topic: orno-or-we-514/modbus-address/set
+          state_topic: orno-or-we-514/modbus-address
+          object_id: orno-or-we-514-modbus-address-configurable
+          unique_id: orno-or-we-514-modbus-address-configurable
+      - homeassistant/sensor/default/power-meter-modbus-address/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: diagnostic
+          name: Modbus Address
+          state_topic: orno-or-we-514/modbus-address
+          object_id: orno-or-we-514-modbus-address
+          unique_id: orno-or-we-514-modbus-address
+      - homeassistant/select/default/power-meter-baud-rate/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Baud Rate
+          options:
+            - 1200
+            - 2400
+            - 4800
+            - 9600
+          enabled_by_default: false
+          command_topic: orno-or-we-514/baud-rate/set
+          state_topic: orno-or-we-514/baud-rate
+          object_id: orno-or-we-514-baud-rate-configurable
+          unique_id: orno-or-we-514-baud-rate-configurable
+          unit_of_measurement: symbols per second
+      - homeassistant/sensor/default/power-meter-baud-rate/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: diagnostic
+          name: Baud Rate
+          state_topic: orno-or-we-514/baud-rate
+          object_id: orno-or-we-514-baud-rate
+          unique_id: orno-or-we-514-baud-rate
+          unit_of_measurement: symbols per second
+      - homeassistant/switch/default/power-meter-display-active-energy/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Active Energy
+          command_topic: orno-or-we-514/display-active-energy/set
+          state_topic: orno-or-we-514/display-active-energy
+          object_id: orno-or-we-514-display-active-energy
+          unique_id: orno-or-we-514-display-active-energy
+      - homeassistant/switch/default/power-meter-display-reactive-energy/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Reactive Energy
+          command_topic: orno-or-we-514/display-reactive-energy/set
+          state_topic: orno-or-we-514/display-reactive-energy
+          object_id: orno-or-we-514-display-reactive-energy
+          unique_id: orno-or-we-514-display-reactive-energy
+      - homeassistant/switch/default/power-meter-display-voltage/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Voltage
+          command_topic: orno-or-we-514/display-voltage/set
+          state_topic: orno-or-we-514/display-voltage
+          object_id: orno-or-we-514-display-voltage
+          unique_id: orno-or-we-514-display-voltage
+      - homeassistant/switch/default/power-meter-display-current/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Current
+          command_topic: orno-or-we-514/display-current/set
+          state_topic: orno-or-we-514/display-current
+          object_id: orno-or-we-514-display-current
+          unique_id: orno-or-we-514-display-current
+      - homeassistant/switch/default/power-meter-display-active-power/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Active Power
+          command_topic: orno-or-we-514/display-active-power/set
+          state_topic: orno-or-we-514/display-active-power
+          object_id: orno-or-we-514-display-active-power
+          unique_id: orno-or-we-514-display-active-power
+      - homeassistant/switch/default/power-meter-display-reactive-power/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Reactive Power
+          command_topic: orno-or-we-514/display-reactive-power/set
+          state_topic: orno-or-we-514/display-reactive-power
+          object_id: orno-or-we-514-display-reactive-power
+          unique_id: orno-or-we-514-display-reactive-power
+      - homeassistant/switch/default/power-meter-display-apparent-power/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Apparent Power
+          command_topic: orno-or-we-514/display-apparent-power/set
+          state_topic: orno-or-we-514/display-apparent-power
+          object_id: orno-or-we-514-display-apparent-power
+          unique_id: orno-or-we-514-display-apparent-power
+      - homeassistant/switch/default/power-meter-display-power-factor/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Power Factor
+          command_topic: orno-or-we-514/display-power-factor/set
+          state_topic: orno-or-we-514/display-power-factor
+          object_id: orno-or-we-514-display-power-factor
+          unique_id: orno-or-we-514-display-power-factor
+      - homeassistant/select/default/power-meter-measurement-mode/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Measurement Mode
+          options:
+            - active forward and reverse
+            - active and reactive
+          command_topic: orno-or-we-514/measurement-mode/set
+          state_topic: orno-or-we-514/measurement-mode
+          object_id: orno-or-we-514-measurement-mode
+          unique_id: orno-or-we-514-measurement-mode
+      - homeassistant/select/default/power-meter-display-digits/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Digits
+          options:
+            - 6 + 0
+            - 5 + 1
+            - 4 + 2
+          command_topic: orno-or-we-514/display-digits/set
+          state_topic: orno-or-we-514/display-digits
+          object_id: orno-or-we-514-display-digits
+          unique_id: orno-or-we-514-display-digits
+      - homeassistant/number/default/power-meter-display-change-time/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Display Change Time
+          min: 0
+          max: 10
+          mode: box
+          command_topic: orno-or-we-514/display-change-time/set
+          state_topic: orno-or-we-514/display-change-time
+          object_id: orno-or-we-514-display-change-time
+          unique_id: orno-or-we-514-display-change-time
+          unit_of_measurement: s
+      - homeassistant/select/default/power-meter-tariff-setup/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Tariff Setup
+          options:
+            - not allowed
+            - allowed
+          command_topic: orno-or-we-514/tariff-setup/set
+          state_topic: orno-or-we-514/tariff-setup
+          object_id: orno-or-we-514-tariff-setup
+          unique_id: orno-or-we-514-tariff-setup
+      - homeassistant/select/default/power-meter-pulse-output-type/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Pulse Output Type
+          options:
+            - active
+            - reactive
+            - second impulse
+          command_topic: orno-or-we-514/pulse-output-type/set
+          state_topic: orno-or-we-514/pulse-output-type
+          object_id: orno-or-we-514-pulse-output-type
+          unique_id: orno-or-we-514-pulse-output-type
+      - homeassistant/select/default/power-meter-impulse-constant/config:
+          device:
+            name: ORNO energy meter
+            manufacturer: ORNO
+            model: OR-WE-514
+            identifiers: orno-or-we-514
+          entity_category: config
+          name: Impulse Constant
+          options:
+            - 100
+            - 1000
+            - 2000
+          command_topic: orno-or-we-514/impulse-constant/set
+          state_topic: orno-or-we-514/impulse-constant
+          object_id: orno-or-we-514-impulse-constant
+          unique_id: orno-or-we-514-impulse-constant
+    sleep: 1000
+    tasks:
+      - o-modbus-address
+      - o-baud-rate
+      - o-display-active-energy
+      - o-display-reactive-energy
+      - o-display-voltage
+      - o-display-current
+      - o-display-active-power
+      - o-display-reactive-power
+      - o-display-apparent-power
+      - o-display-power-factor
+      - o-measurement-mode
+      - o-display-digits
+      - o-display-change-time
+      - o-tariff-setup
+      - o-pulse-output-type
+      - o-impulse-constant
+
+handlers:
+  - id: o-datetime-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/datetime/set
+    value:
+      type: datetime
+      data:
+        - byte:
+            register_type: holding
+            address: 0x8120
+            byte_index: 0
+            increase_by: 2000
+        - byte:
+            register_type: holding
+            address: 0x8120
+            byte_index: 1
+        - byte:
+            register_type: holding
+            address: 0x8121
+            byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x8121
+            byte_index: 1
+        - byte:
+            register_type: holding
+            address: 0x8122
+            byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x8122
+            byte_index: 1
+  - id: o-modbus-address-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/modbus-address/set
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x110
+  - id: o-baud-rate-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/baud-rate/set
+    value:
+      mapping:
+        1: 1200
+        2: 2400
+        3: 4800
+        4: 9600
+      data:
+        - byte:
+            register_type: holding
+            address: 0x111
+            byte_index: 1
+  - id: o-display-active-energy-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-active-energy/set
+    value:
+      mapping:
+        0: OFF  # Device seems to require that active energy is always displayed.
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00000001
+  - id: o-display-reactive-energy-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-reactive-energy/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00000010
+            bitshift: 1
+  - id: o-display-voltage-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-voltage/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00000100
+            bitshift: 2
+  - id: o-display-current-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-current/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00001000
+            bitshift: 3
+  - id: o-display-active-power-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-active-power/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00010000
+            bitshift: 4
+  - id: o-display-reactive-power-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-reactive-power/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b00100000
+            bitshift: 5
+  - id: o-display-apparent-power-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-apparent-power/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b01000000
+            bitshift: 6
+  - id: o-display-power-factor-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-power-factor/set
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 0
+            bitmask: 0b10000000
+            bitshift: 7
+  - id: o-display-change-time-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-change-time/set
+    value:
+      data:
+        - byte:
+            register_type: holding
+            address: 0x113
+            byte_index: 1
+  - id: o-measurement-mode-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/measurement-mode/set
+    value:
+      mapping:
+        0: active forward and reverse
+        1: active and reactive
+      data:
+        - byte:
+            register_type: holding
+            address: 0x112
+            byte_index: 1
+  - id: o-display-digits-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/display-digits/set
+    value:
+      mapping:
+        0: 6 + 0
+        1: 5 + 1
+        2: 4 + 2
+      data:
+        - byte:
+            register_type: holding
+            address: 0x113
+            byte_index: 0
+  - id: o-tariff-setup-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/tariff-setup/set
+    value:
+      mapping:
+        0: not allowed
+        1: allowed
+      data:
+        - byte:
+            register_type: holding
+            address: 0x114
+            byte_index: 0
+  - id: o-pulse-output-type-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/pulse-output-type/set
+    value:
+      mapping:
+        0: active
+        1: reactive
+        2: second impulse
+      data:
+        - byte:
+            register_type: holding
+            address: 0x114
+            byte_index: 1
+  - id: o-impulse-constant-set
+    device: orno-or-we-514
+    mqtt_topic: orno-or-we-514/impulse-constant/set
+    value:
+      data:
+        - short:
+            register_type: holding
+            address: 0x118
+
+services:
+  - id: power-meter-update-service
+    handlers:
+      - o-datetime-set
+      - o-modbus-address-set
+      - o-baud-rate-set
+      - o-display-active-energy-set
+      - o-display-reactive-energy-set
+      - o-display-voltage-set
+      - o-display-current-set
+      - o-display-active-power-set
+      - o-display-reactive-power-set
+      - o-display-apparent-power-set
+      - o-display-power-factor-set
+      - o-display-change-time-set
+      - o-measurement-mode-set
+      - o-display-digits-set
+      - o-tariff-setup-set
+      - o-pulse-output-type-set
+      - o-impulse-constant-set
