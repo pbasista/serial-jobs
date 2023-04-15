@@ -79,7 +79,7 @@ class ModbusDevice(Device):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: reading from %s Modbus register address %d",
+            "device %s: reading from %s Modbus register address 0x%X",
             self.spec_id,
             register_type.name,
             address,
@@ -114,7 +114,7 @@ class ModbusDevice(Device):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: reading from %s Modbus register address range %d-%d",
+            "device %s: reading from %s Modbus register address range 0x%X-0x%X",
             self.spec_id,
             register_type.name,
             start_address,
@@ -157,7 +157,7 @@ class ModbusDevice(Device):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: writing to %s Modbus register address %d",
+            "device %s: writing to %s Modbus register address 0x%X",
             self.spec_id,
             register_type.name,
             address,
@@ -186,7 +186,7 @@ class ModbusDevice(Device):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: writing to %s Modbus register address range %d-%d",
+            "device %s: writing to %s Modbus register address range 0x%X-0x%X",
             self.spec_id,
             register_type.name,
             start_address,

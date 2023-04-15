@@ -94,7 +94,7 @@ class BMSDevice(Device):
 
     def _read_register(self, address: int, register_type: RegisterType) -> int:
         LOGGER.debug(
-            "device %s: reading from %s BMS register address %d",
+            "device %s: reading from %s BMS register address 0x%X",
             self.spec_id,
             register_type.name,
             address,

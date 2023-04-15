@@ -141,7 +141,7 @@ class Device(SpecMixin):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: reading from %s register addresses %d-%d",
+            "device %s: reading from %s register addresses 0x%X-0x%X",
             self.spec_id,
             register_type.name,
             start_address,
@@ -179,7 +179,7 @@ class Device(SpecMixin):
             register_type = self.default_register_type
 
         LOGGER.debug(
-            "device %s: writing to %s register addresses %d-%d",
+            "device %s: writing to %s register addresses 0x%X-0x%X",
             self.spec_id,
             register_type.name,
             start_address,
