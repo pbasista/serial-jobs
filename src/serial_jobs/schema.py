@@ -159,8 +159,8 @@ jobs_schema = Seq(job_schema)
 
 input_value_schema = Map(
     {
+        Optional("type"): Enum(("float", "int", "str", "date", "datetime", "time")),
         Optional("mapping"): MapPattern(Str(), Str()),
-        Optional("type"): Enum(("float", "int", "str")),
         "data": data_schema,
     }
 )
