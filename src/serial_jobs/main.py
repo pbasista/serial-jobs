@@ -55,8 +55,10 @@ async def work(
     Device.load_specifications(config["devices"])
     Task.load_specifications(config["tasks"])
     Job.load_specifications(config["jobs"])
-    Handler.load_specifications(config["handlers"])
-    Service.load_specifications(config["services"])
+    if "handlers" in config:
+        Handler.load_specifications(config["handlers"])
+    if "services" in config:
+        Service.load_specifications(config["services"])
     logger.debug("specifications loaded")
 
     awaitable_jobs = [

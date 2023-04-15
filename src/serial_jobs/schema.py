@@ -207,7 +207,7 @@ configuration_schema = Map(
         "devices": devices_schema,
         "tasks": tasks_schema,
         "jobs": jobs_schema,
-        "handlers": handlers_schema,
-        "services": services_schema,
+        Optional("handlers"): handlers_schema,
+        Optional("services"): services_schema,
     }
 )
