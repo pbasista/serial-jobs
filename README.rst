@@ -664,7 +664,7 @@ that might only be present within certain other configuration data structures.
     and how to write it to a particular serial `device <devices_>`_.
 
     It consists of an object which specifies how to obtain the value
-    for sending to the configured MQTT broker from the configured serial device.
+    for writing to the configured serial device from the incoming MQTT messages.
 
     It might contain fields defined below.
 
@@ -689,6 +689,18 @@ that might only be present within certain other configuration data structures.
         `float`_, `int`_,
         `str`_,
         `date`_, `datetime`_ and `time`_.
+
+        .. note::
+
+            Parsing of MQTT message payload
+            into the `date`_, `datetime`_ and `time`_ types
+            is implemented via their respective `fromisoformat`_ methods.
+
+            The parsed date or datetime or time value is then split
+            into tuples of the individual numeric fields
+            which can be written to the desired device registers.
+
+        .. _fromisoformat: https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat
 
     :data: A *sequence* of data part `specifications <data_>`_.
         They specify how to convert the obtained Python value to data parts
