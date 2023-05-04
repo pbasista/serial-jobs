@@ -182,8 +182,9 @@ class Data:
                 elif self.bitshift < 0:
                     register_data >>= self.bitshift
             if self.bitmask:
-                inverse_bitmask = (1 << 8 * expected_size) - 1
-                register_data |= current_data ^ inverse_bitmask
+                binary_ones = (1 << 8 * expected_size) - 1
+                inverse_bitmask = self.bitmask ^ binary_ones
+                register_data |= current_data & inverse_bitmask
 
         changed_bytes = self.pack(register_data)
 
