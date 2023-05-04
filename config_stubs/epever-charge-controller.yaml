@@ -1,3 +1,6 @@
+# Datasheet: B-Series MODBUS Specification EPEVER Corporation V 2.3 June 12, 2015
+# available at: https://www.developpez.net/forums/attachments/p196506d1451307310/systemes/autres-systemes/automation/probleme-com-modbus-pl7-pro/controllerprotocolv2.3.pdf/
+
 devices:
   - id: epever-xtra-4415n
     name: EPEVER XTRA 4415N MPPT solar charge controller
@@ -55,6 +58,117 @@ tasks:
             register_type: holding
             address: 0x9013
             byte_index: 1
+  - id: e-device-over-temperature
+    name: device temperature higher than over-temperature protection point
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/device-over-temperature
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: discrete
+            address: 0x2000
+  - id: e-night-time
+    name: night time detected
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/night-time
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            register_type: discrete
+            address: 0x200C
+  - id: e-solar-rated-voltage
+    name: solar rated voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/solar-rated-voltage
+    value:
+      data:
+        - short:
+            address: 0x3000
+            scale_factor: 100
+  - id: e-solar-rated-current
+    name: solar rated current in A
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/solar-rated-current
+    value:
+      data:
+        - short:
+            address: 0x3001
+            scale_factor: 100
+  - id: e-solar-rated-power
+    name: solar rated power in W
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/solar-rated-power
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3002
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-battery-rated-voltage
+    name: battery rated voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-rated-voltage
+    value:
+      data:
+        - short:
+            address: 0x3004
+            scale_factor: 100
+  - id: e-battery-rated-current
+    name: battery rated current in A
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-rated-current
+    value:
+      data:
+        - short:
+            address: 0x3005
+            scale_factor: 100
+  - id: e-battery-rated-power
+    name: battery rated power in W
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/battery-rated-power
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3006
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-charging-mode
+    name: charging mode
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/charging-mode
+    value:
+      mapping:
+        0: connect / disconnect
+        1: PWM
+        2: MPTT
+      data:
+        - short:
+            address: 0x3008
+  - id: e-load-rated-current
+    name: load rated current in A
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-rated-current
+    value:
+      data:
+        - short:
+            address: 0x300E
+            scale_factor: 100
   - id: e-solar-voltage
     name: solar voltage in V
     device: epever-xtra-4415n
@@ -97,6 +211,39 @@ tasks:
         - long:
             register_count: 2
             address: 0x3106
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-load-voltage
+    name: load voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-voltage
+    value:
+      data:
+        - short:
+            address: 0x310C
+            scale_factor: 100
+  - id: e-load-current
+    name: load current in A
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-current
+    value:
+      data:
+        - short:
+            address: 0x310D
+            scale_factor: 100
+  - id: e-load-power
+    name: load power in W
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-power
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x310E
             byte_order:
               - 2
               - 3
@@ -147,6 +294,15 @@ tasks:
         - signed_short:
             address: 0x311B
             scale_factor: 100
+  - id: e-system-voltage
+    name: system voltage in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/system-voltage
+    value:
+      data:
+        - short:
+            address: 0x311D
+            scale_factor: 100
   - id: e-battery-voltage-status
     name: battery voltage status
     device: epever-xtra-4415n
@@ -176,33 +332,148 @@ tasks:
             address: 0x3200
             bitmask: 0b11110000
             bitshift: 4
-  - id: e-charging-status
-    name: charging equipment status
+  - id: e-battery-internal-resistance-abnormal
+    name: battery internal resistance abnormal
     device: epever-xtra-4415n
-    mqtt_topic: epever-xtra-4415n/charging-status
+    mqtt_topic: epever-xtra-4415n/battery-internal-resistance-abnormal
     value:
       mapping:
-        0: false
-        1: true
+        0: OFF
+        1: ON
       data:
-        - short:
-            address: 0x3201
+        - byte:
+            address: 0x3200
+            byte_index: 0
             bitmask: 0b1
-  - id: e-charging-fault
-    name: charging equipment fault
+  - id: e-battery-voltage-identification-incorrect
+    name: battery voltage identification incorrect
     device: epever-xtra-4415n
-    mqtt_topic: epever-xtra-4415n/charging-fault
+    mqtt_topic: epever-xtra-4415n/battery-voltage-identification-incorrect
     value:
       mapping:
-        0: false
-        1: true
+        0: OFF
+        1: ON
       data:
-        - short:
+        - byte:
+            address: 0x3200
+            byte_index: 0
+            bitmask: 0b10000000
+            bitshift: 7
+  - id: e-input-voltage-status
+    name: input voltage status
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/input-voltage-status
+    value:
+      mapping:
+        0: normal
+        1: no power connected
+        2: input voltage higher
+        3: input voltage error
+      data:
+        - byte:
             address: 0x3201
-            bitmask: 0b10
+            byte_index: 0
+            bitmask: 0b11000000
+            bitshift: 6
+  - id: e-charging-mosfet-shorted
+    name: charging MOSFET shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/charging-mosfet-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 0
+            bitmask: 0b00100000
+            bitshift: 5
+  - id: e-charging-or-anti-reverse-mosfet-shorted
+    name: charging or anti-reverse MOSFET shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/charging-or-anti-reverse-mosfet-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 0
+            bitmask: 0b00010000
+            bitshift: 4
+  - id: e-anti-reverse-mosfet-shorted
+    name: anti-reverse MOSFET shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/anti-reverse-mosfet-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 0
+            bitmask: 0b00001000
+            bitshift: 3
+  - id: e-input-overcurrent
+    name: input overcurrent
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/input-overcurrent
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 0
+            bitmask: 0b00000100
+            bitshift: 2
+  - id: e-load-overcurrent
+    name: load overcurrent
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-overcurrent
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 0
+            bitmask: 0b00000010
             bitshift: 1
+  - id: e-load-shorted
+    name: load shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 0
+            bitmask: 0b00000001
+  - id: e-load-mosfet-shorted
+    name: load MOSFET shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-mosfet-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 1
+            bitmask: 0b10000000
+            bitshift: 7
   - id: e-charging-type
-    name: charging equipment charging type
+    name: charging charging type
     device: epever-xtra-4415n
     mqtt_topic: epever-xtra-4415n/charging-type
     value:
@@ -212,10 +483,304 @@ tasks:
         2: boost
         3: equalization
       data:
-        - short:
+        - byte:
             address: 0x3201
+            byte_index: 1
             bitmask: 0b1100
             bitshift: 2
+  - id: e-charging-equipment-fault
+    name: charging equipment fault
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/charging-equipment-fault
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 1
+            bitmask: 0b10
+            bitshift: 1
+  - id: e-charging-equipment-running
+    name: charging equipment running
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/charging-equipment-running
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3201
+            byte_index: 1
+            bitmask: 0b1
+  - id: e-load-voltage-status
+    name: load voltage status
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-voltage-status
+    value:
+      mapping:
+        0: normal
+        1: low
+        2: high
+        3: no access
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 0
+            bitmask: 0b11000000
+            bitshift: 6
+  - id: e-load-power-status
+    name: load power status
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/load-power-status
+    value:
+      mapping:
+        0: light load
+        1: moderate load
+        2: rated load
+        3: overload
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 0
+            bitmask: 0b110000
+            bitshift: 4
+  - id: e-discharging-equipment-shorted
+    name: discharging equipment shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 0
+            bitmask: 0b1000
+            bitshift: 3
+  - id: e-discharging-equipment-unable-to-discharge
+    name: discharging equipment unable to discharge
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-unable-to-discharge
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 0
+            bitmask: 0b100
+            bitshift: 2
+  - id: e-discharging-equipment-unable-to-stop-discharging
+    name: discharging equipment unable to stop discharging
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-unable-to-stop-discharging
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 0
+            bitmask: 0b10
+            bitshift: 1
+  - id: e-discharging-equipment-output-voltage-abnormal
+    name: discharging equipment output voltage abnormal
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-output-voltage-abnormal
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 0
+            bitmask: 0b1
+  - id: e-discharging-equipment-input-overvoltage
+    name: discharging equipment input overvoltage
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-input-overvoltage
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 1
+            bitmask: 0b10000000
+            bitshift: 7
+  - id: e-discharging-equipment-high-voltage-side-shorted
+    name: discharging equipment high voltage side shorted
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-high-voltage-side-shorted
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 1
+            bitmask: 0b1000000
+            bitshift: 6
+  - id: e-discharging-equipment-boost-overvoltage
+    name: discharging equipment boost overvoltage
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-boost-overvoltage
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 1
+            bitmask: 0b100000
+            bitshift: 5
+  - id: e-discharging-equipment-output-overvoltage
+    name: discharging equipment output overvoltage
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-output-overvoltage
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 1
+            bitmask: 0b10000
+            bitshift: 4
+  - id: e-discharging-equipment-fault
+    name: discharging equipment fault
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-fault
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 1
+            bitmask: 0b10
+            bitshift: 1
+  - id: e-discharging-equipment-running
+    name: discharging equipment running
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/discharging-equipment-running
+    value:
+      mapping:
+        0: OFF
+        1: ON
+      data:
+        - byte:
+            address: 0x3202
+            byte_index: 1
+            bitmask: 0b1
+  - id: e-maximum-solar-voltage-today
+    name: maximum solar voltage today in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/maximum-solar-voltage-today
+    value:
+      data:
+        - short:
+            address: 0x3300
+            scale_factor: 100
+  - id: e-minimum-solar-voltage-today
+    name: minimum solar voltage today in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/minimum-solar-voltage-today
+    value:
+      data:
+        - short:
+            address: 0x3301
+            scale_factor: 100
+  - id: e-maximum-battery-voltage-today
+    name: maximum battery voltage today in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/maximum-battery-voltage-today
+    value:
+      data:
+        - short:
+            address: 0x3302
+            scale_factor: 100
+  - id: e-minimum-battery-voltage-today
+    name: minimum battery voltage today in V
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/minimum-battery-voltage-today
+    value:
+      data:
+        - short:
+            address: 0x3303
+            scale_factor: 100
+  - id: e-consumed-energy-today
+    name: consumed energy today in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/consumed-energy-today
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3304
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-consumed-energy-this-month
+    name: consumed energy this month in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/consumed-energy-this-month
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3306
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-consumed-energy-this-year
+    name: consumed energy this year in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/consumed-energy-this-year
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3308
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-consumed-energy
+    name: consumed energy in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/consumed-energy
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x330A
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
   - id: e-generated-energy-today
     name: generated energy today in kWh
     device: epever-xtra-4415n
@@ -225,6 +790,36 @@ tasks:
         - long:
             register_count: 2
             address: 0x330C
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-generated-energy-this-month
+    name: generated energy this month in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/generated-energy-this-month
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x330E
+            byte_order:
+              - 2
+              - 3
+              - 0
+              - 1
+            scale_factor: 100
+  - id: e-generated-energy-this-year
+    name: generated energy this year in kWh
+    device: epever-xtra-4415n
+    mqtt_topic: epever-xtra-4415n/generated-energy-this-year
+    value:
+      data:
+        - long:
+            register_count: 2
+            address: 0x3310
             byte_order:
               - 2
               - 3
@@ -485,24 +1080,293 @@ tasks:
     mqtt_topic: epever-xtra-4415n/charging-device-on
     value:
       mapping:
-        0: false
-        1: true
+        0: OFF
+        1: ON
       data:
         - byte:
             register_type: coil
             address: 0x0
 
 jobs:
-  - id: charge-controller-config
+  - id: charge-controller-diagnostics
     mqtt_messages:
-      - homeassistant/sensor/default/charge-controller-datetime/config:
+      - homeassistant/binary_sensor/default/charge-controller-device-over-temperature/config:
           device:
             name: EPEVER solar charge controller
             manufacturer: EPEVER
             model: XTRA 4415N
             identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Device over-temperature
+          state_topic: epever-xtra-4415n/device-over-temperature
+          object_id: epever-xtra-4415n-over-temperature
+          unique_id: epever-xtra-4415n-over-temperature
+      - homeassistant/binary_sensor/default/charge-controller-night-time/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Night time
+          state_topic: epever-xtra-4415n/night-time
+          object_id: epever-xtra-4415n-night-time
+          unique_id: epever-xtra-4415n-night-time
+      - homeassistant/sensor/default/charge-controller-solar-rated-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Solar rated voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/solar-rated-voltage
+          object_id: epever-xtra-4415n-solar-rated-voltage
+          unique_id: epever-xtra-4415n-solar-rated-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-solar-rated-current/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: current
+          name: Solar rated current
+          state_class: measurement
+          state_topic: epever-xtra-4415n/solar-rated-current
+          object_id: epever-xtra-4415n-solar-rated-current
+          unique_id: epever-xtra-4415n-solar-rated-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/charge-controller-solar-rated-power/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: power
+          name: Solar rated power
+          state_class: measurement
+          state_topic: epever-xtra-4415n/solar-rated-power
+          object_id: epever-xtra-4415n-solar-rated-power
+          unique_id: epever-xtra-4415n-solar-rated-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/charge-controller-battery-rated-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Battery rated voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-rated-voltage
+          object_id: epever-xtra-4415n-battery-rated-voltage
+          unique_id: epever-xtra-4415n-battery-rated-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-battery-rated-current/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: current
+          name: Battery rated current
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-rated-current
+          object_id: epever-xtra-4415n-battery-rated-current
+          unique_id: epever-xtra-4415n-battery-rated-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/charge-controller-battery-rated-power/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: power
+          name: Battery rated power
+          state_class: measurement
+          state_topic: epever-xtra-4415n/battery-rated-power
+          object_id: epever-xtra-4415n-battery-rated-power
+          unique_id: epever-xtra-4415n-battery-rated-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/charge-controller-charging-mode/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging mode
+          state_topic: epever-xtra-4415n/charging-mode
+          object_id: epever-xtra-4415n-charging-mode
+          unique_id: epever-xtra-4415n-charging-mode
+      - homeassistant/sensor/default/charge-controller-load-rated-current/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: current
+          name: Load rated current
+          state_class: measurement
+          state_topic: epever-xtra-4415n/load-rated-current
+          object_id: epever-xtra-4415n-load-rated-current
+          unique_id: epever-xtra-4415n-load-rated-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/charge-controller-load-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Load voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/load-voltage
+          object_id: epever-xtra-4415n-load-voltage
+          unique_id: epever-xtra-4415n-load-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-load-current/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: current
+          name: Load current
+          state_class: measurement
+          state_topic: epever-xtra-4415n/load-current
+          object_id: epever-xtra-4415n-load-current
+          unique_id: epever-xtra-4415n-load-current
+          unit_of_measurement: A
+      - homeassistant/sensor/default/charge-controller-load-power/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: power
+          name: Load power
+          state_class: measurement
+          state_topic: epever-xtra-4415n/load-power
+          object_id: epever-xtra-4415n-load-power
+          unique_id: epever-xtra-4415n-load-power
+          unit_of_measurement: W
+      - homeassistant/sensor/default/charge-controller-system-voltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: System voltage
+          state_class: measurement
+          state_topic: epever-xtra-4415n/system-voltage
+          object_id: epever-xtra-4415n-system-voltage
+          unique_id: epever-xtra-4415n-system-voltage
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-maximum-solar-voltage-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Maximum solar voltage today
+          state_class: measurement
+          state_topic: epever-xtra-4415n/maximum-solar-voltage-today
+          object_id: epever-xtra-4415n-maximum-solar-voltage-today
+          unique_id: epever-xtra-4415n-maximum-solar-voltage-today
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-minimum-solar-voltage-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Minimum solar voltage today
+          state_class: measurement
+          state_topic: epever-xtra-4415n/minimum-solar-voltage-today
+          object_id: epever-xtra-4415n-minimum-solar-voltage-today
+          unique_id: epever-xtra-4415n-minimum-solar-voltage-today
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-maximum-battery-voltage-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Maximum battery voltage today
+          state_class: measurement
+          state_topic: epever-xtra-4415n/maximum-battery-voltage-today
+          object_id: epever-xtra-4415n-maximum-battery-voltage-today
+          unique_id: epever-xtra-4415n-maximum-battery-voltage-today
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-minimum-battery-voltage-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          device_class: voltage
+          name: Minimum battery voltage today
+          state_class: measurement
+          state_topic: epever-xtra-4415n/minimum-battery-voltage-today
+          object_id: epever-xtra-4415n-minimum-battery-voltage-today
+          unique_id: epever-xtra-4415n-minimum-battery-voltage-today
+          unit_of_measurement: V
+      - homeassistant/sensor/default/charge-controller-consumed-energy-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Consumed energy today
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/consumed-energy-today
+          object_id: epever-xtra-4415n-consumed-energy-today
+          unique_id: epever-xtra-4415n-consumed-energy-today
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-consumed-energy-this-month/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Consumed energy this month
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/consumed-energy-this-month
+          object_id: epever-xtra-4415n-consumed-energy-this-month
+          unique_id: epever-xtra-4415n-consumed-energy-this-month
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-consumed-energy-this-year/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Consumed energy this year
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/consumed-energy-this-year
+          object_id: epever-xtra-4415n-consumed-energy-this-year
+          unique_id: epever-xtra-4415n-consumed-energy-this-year
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-consumed-energy/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Consumed energy
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/consumed-energy
+          object_id: epever-xtra-4415n-consumed-energy
+          unique_id: epever-xtra-4415n-consumed-energy
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-generated-energy-today/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Generated energy today
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/generated-energy-today
+          object_id: epever-xtra-4415n-generated-energy-today
+          unique_id: epever-xtra-4415n-generated-energy-today
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-generated-energy-this-month/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Generated energy this month
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/generated-energy-this-month
+          object_id: epever-xtra-4415n-generated-energy-this-month
+          unique_id: epever-xtra-4415n-generated-energy-this-month
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-generated-energy-this-year/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Generated energy this year
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/generated-energy-this-year
+          object_id: epever-xtra-4415n-generated-energy-this-year
+          unique_id: epever-xtra-4415n-generated-energy-this-year
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-generated-energy/config:
+          device:
+            identifiers: epever-xtra-4415n
+          device_class: energy
+          name: Generated energy
+          state_class: total_increasing
+          state_topic: epever-xtra-4415n/generated-energy
+          object_id: epever-xtra-4415n-generated-energy
+          unique_id: epever-xtra-4415n-generated-energy
+          unit_of_measurement: kWh
+      - homeassistant/sensor/default/charge-controller-datetime/config:
+          device:
+            identifiers: epever-xtra-4415n
           device_class: timestamp
-          entity_category: config
+          entity_category: diagnostic
           name: Date and Time
           state_class: measurement
           state_topic: epever-xtra-4415n/datetime
@@ -511,7 +1375,7 @@ jobs:
       - homeassistant/sensor/default/charge-controller-battery-type/config:
           device:
             identifiers: epever-xtra-4415n
-          entity_category: config
+          entity_category: diagnostic
           name: Battery Type
           state_topic: epever-xtra-4415n/battery-type
           object_id: epever-xtra-4415n-battery-type
@@ -519,7 +1383,7 @@ jobs:
       - homeassistant/sensor/default/charge-controller-battery-rated-electric-charge/config:
           device:
             identifiers: epever-xtra-4415n
-          entity_category: config
+          entity_category: diagnostic
           name: Battery Rated Electric Charge
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-rated-electric-charge
@@ -529,7 +1393,6 @@ jobs:
       - homeassistant/sensor/default/charge-controller-temperature-compensation-coefficient/config:
           device:
             identifiers: epever-xtra-4415n
-          entity_category: config
           name: Temperature Compensation Coefficient
           state_class: measurement
           state_topic: epever-xtra-4415n/temperature-compensation-coefficient
@@ -540,7 +1403,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery High Voltage Disconnect
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-high-voltage-disconnect
@@ -551,7 +1413,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Charging Limit Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-charging-limit-voltage
@@ -562,7 +1423,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery High Voltage Reconnect Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-high-voltage-reconnect
@@ -573,7 +1433,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Equalization Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-equalization-voltage
@@ -584,7 +1443,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Boost Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-boost-voltage
@@ -595,7 +1453,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Float Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-float-voltage
@@ -606,7 +1463,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Boost Reconnect Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-boost-reconnect-voltage
@@ -617,7 +1473,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Low Voltage Reconnect Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-low-voltage-reconnect
@@ -628,7 +1483,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Undervoltage Recovery Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-undervoltage-recovery
@@ -639,7 +1493,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Undervoltage Warning Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-undervoltage-warning
@@ -650,7 +1503,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Low Voltage Disconnect
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-low-voltage-disconnect
@@ -661,7 +1513,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Discharging Limit Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-discharging-limit
@@ -671,7 +1522,6 @@ jobs:
       - homeassistant/sensor/default/charge-controller-battery-equalization-cycle/config:
           device:
             identifiers: epever-xtra-4415n
-          entity_category: config
           name: Battery Equalization Cycle
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-equalization-cycle
@@ -682,7 +1532,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: duration
-          entity_category: config
           name: Battery Equalization Duration
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-equalization-duration
@@ -692,7 +1541,6 @@ jobs:
       - homeassistant/sensor/default/charge-controller-battery-boost-duration/config:
           device:
             identifiers: epever-xtra-4415n
-          entity_category: config
           name: Battery Boost Duration
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-boost-duration
@@ -701,6 +1549,32 @@ jobs:
           unit_of_measurement: minutes
     sleep: 1000
     tasks:
+      - e-device-over-temperature
+      - e-night-time
+      - e-solar-rated-voltage
+      - e-solar-rated-current
+      - e-solar-rated-power
+      - e-battery-rated-voltage
+      - e-battery-rated-current
+      - e-battery-rated-power
+      - e-charging-mode
+      - e-load-rated-current
+      - e-load-voltage
+      - e-load-current
+      - e-load-power
+      - e-system-voltage
+      - e-maximum-solar-voltage-today
+      - e-minimum-solar-voltage-today
+      - e-maximum-battery-voltage-today
+      - e-minimum-battery-voltage-today
+      - e-consumed-energy-today
+      - e-consumed-energy-this-month
+      - e-consumed-energy-this-year
+      - e-consumed-energy
+      - e-generated-energy-today
+      - e-generated-energy-this-month
+      - e-generated-energy-this-year
+      - e-generated-energy
       - e-datetime
       - e-battery-type
       - e-battery-rated-electric-charge
@@ -722,11 +1596,227 @@ jobs:
       - e-battery-boost-duration
   - id: charge-controller
     mqtt_messages:
-      - homeassistant/sensor/default/charge-controller-battery-temperature/config:
+      - homeassistant/sensor/default/charge-controller-battery-voltage-status/config:
           device:
             name: EPEVER solar charge controller
             manufacturer: EPEVER
             model: XTRA 4415N
+            identifiers: epever-xtra-4415n
+          name: Battery Voltage Status
+          entity_category: diagnostic
+          state_topic: epever-xtra-4415n/battery-voltage-status
+          object_id: epever-xtra-4415n-battery-voltage-status
+          unique_id: epever-xtra-4415n-battery-voltage-status
+      - homeassistant/sensor/default/charge-controller-battery-temperature-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Battery Temperature Status
+          state_topic: epever-xtra-4415n/battery-temperature-status
+          object_id: epever-xtra-4415n-battery-temperature-status
+          unique_id: epever-xtra-4415n-battery-temperature-status
+      - homeassistant/binary_sensor/default/charge-controller-battery-internal-resistance-abnormal/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Battery internal resistance abnormal
+          state_topic: epever-xtra-4415n/battery-internal-resistance-abnormal
+          object_id: epever-xtra-4415n-battery-internal-resistance-abnormal
+          unique_id: epever-xtra-4415n-battery-internal-resistance-abnormal
+      - homeassistant/binary_sensor/default/charge-controller-battery-voltage-identification-incorrect/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Battery voltage identification incorrect
+          state_topic: epever-xtra-4415n/battery-voltage-identification-incorrect
+          object_id: epever-xtra-4415n-battery-voltage-identification-incorrect
+          unique_id: epever-xtra-4415n-battery-voltage-identification-incorrect
+      - homeassistant/sensor/default/charge-controller-input-voltage-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Input Voltage Status
+          state_topic: epever-xtra-4415n/input-voltage-status
+          object_id: epever-xtra-4415n-input-voltage-status
+          unique_id: epever-xtra-4415n-input-voltage-status
+      - homeassistant/binary_sensor/default/charge-controller-charging-mosfet-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging MOSFET shorted
+          state_topic: epever-xtra-4415n/charging-mosfet-shorted
+          object_id: epever-xtra-4415n-charging-mosfet-shorted
+          unique_id: epever-xtra-4415n-charging-mosfet-shorted
+      - homeassistant/binary_sensor/default/charge-controller-charging-or-anti-reverse-mosfet-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging or anti-reverse MOSFET shorted
+          state_topic: epever-xtra-4415n/charging-or-anti-reverse-mosfet-shorted
+          object_id: epever-xtra-4415n-charging-or-anti-reverse-mosfet-shorted
+          unique_id: epever-xtra-4415n-charging-or-anti-reverse-mosfet-shorted
+      - homeassistant/binary_sensor/default/charge-controller-anti-reverse-mosfet-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Anti-reverse MOSFET shorted
+          state_topic: epever-xtra-4415n/anti-reverse-mosfet-shorted
+          object_id: epever-xtra-4415n-anti-reverse-mosfet-shorted
+          unique_id: epever-xtra-4415n-anti-reverse-mosfet-shorted
+      - homeassistant/binary_sensor/default/charge-controller-input-overcurrent/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Input over-current
+          state_topic: epever-xtra-4415n/input-overcurrent
+          object_id: epever-xtra-4415n-input-overcurrent
+          unique_id: epever-xtra-4415n-input-overcurrent
+      - homeassistant/binary_sensor/default/charge-controller-load-overcurrent/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Load over-current
+          state_topic: epever-xtra-4415n/load-overcurrent
+          object_id: epever-xtra-4415n-load-overcurrent
+          unique_id: epever-xtra-4415n-load-overcurrent
+      - homeassistant/binary_sensor/default/charge-controller-load-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Load shorted
+          state_topic: epever-xtra-4415n/load-shorted
+          object_id: epever-xtra-4415n-load-shorted
+          unique_id: epever-xtra-4415n-load-shorted
+      - homeassistant/binary_sensor/default/charge-controller-load-mosfet-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Load MOSFET shorted
+          state_topic: epever-xtra-4415n/load-mosfet-shorted
+          object_id: epever-xtra-4415n-load-mosfet-shorted
+          unique_id: epever-xtra-4415n-load-mosfet-shorted
+      - homeassistant/sensor/default/charge-controller-charging-type/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging Type
+          state_topic: epever-xtra-4415n/charging-type
+          object_id: epever-xtra-4415n-charging-type
+          unique_id: epever-xtra-4415n-charging-type
+      - homeassistant/binary_sensor/default/charge-controller-charging-equipment-fault/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging equipment fault
+          state_topic: epever-xtra-4415n/charging-equipment-fault
+          object_id: epever-xtra-4415n-charging-equipment-fault
+          unique_id: epever-xtra-4415n-charging-equipment-fault
+      - homeassistant/binary_sensor/default/charge-controller-charging-equipment-running/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Charging equipment running
+          state_topic: epever-xtra-4415n/charging-equipment-running
+          object_id: epever-xtra-4415n-charging-equipment-running
+          unique_id: epever-xtra-4415n-charging-equipment-running
+      - homeassistant/sensor/default/charge-controller-load-voltage-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Load voltage status
+          state_topic: epever-xtra-4415n/load-voltage-status
+          object_id: epever-xtra-4415n-load-voltage-status
+          unique_id: epever-xtra-4415n-load-voltage-status
+      - homeassistant/sensor/default/charge-controller-load-power-status/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Load power status
+          state_topic: epever-xtra-4415n/load-power-status
+          object_id: epever-xtra-4415n-load-power-status
+          unique_id: epever-xtra-4415n-load-power-status
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment shorted
+          state_topic: epever-xtra-4415n/discharging-equipment-shorted
+          object_id: epever-xtra-4415n-discharging-equipment-shorted
+          unique_id: epever-xtra-4415n-discharging-equipment-shorted
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-unable-to-discharge/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment unable to discharge
+          state_topic: epever-xtra-4415n/discharging-equipment-unable-to-discharge
+          object_id: epever-xtra-4415n-discharging-equipment-unable-to-discharge
+          unique_id: epever-xtra-4415n-discharging-equipment-unable-to-discharge
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-unable-to-stop-discharging/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment unable to stop discharging
+          state_topic: epever-xtra-4415n/discharging-equipment-unable-to-stop-discharging
+          object_id: epever-xtra-4415n-discharging-equipment-unable-to-stop-discharging
+          unique_id: epever-xtra-4415n-discharging-equipment-unable-to-stop-discharging
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-output-voltage-abnormal/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment output voltage abnormal
+          state_topic: epever-xtra-4415n/discharging-equipment-output-voltage-abnormal
+          object_id: epever-xtra-4415n-discharging-equipment-output-voltage-abnormal
+          unique_id: epever-xtra-4415n-discharging-equipment-output-voltage-abnormal
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-input-overvoltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment input overvoltage
+          state_topic: epever-xtra-4415n/discharging-equipment-input-overvoltage
+          object_id: epever-xtra-4415n-discharging-equipment-input-overvoltage
+          unique_id: epever-xtra-4415n-discharging-equipment-input-overvoltage
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-high-voltage-side-shorted/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment high voltage side shorted
+          state_topic: epever-xtra-4415n/discharging-equipment-high-voltage-side-shorted
+          object_id: epever-xtra-4415n-discharging-equipment-high-voltage-side-shorted
+          unique_id: epever-xtra-4415n-discharging-equipment-high-voltage-side-shorted
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-boost-overvoltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment boost overvoltage
+          state_topic: epever-xtra-4415n/discharging-equipment-boost-overvoltage
+          object_id: epever-xtra-4415n-discharging-equipment-boost-overvoltage
+          unique_id: epever-xtra-4415n-discharging-equipment-boost-overvoltage
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-output-overvoltage/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment output overvoltage
+          state_topic: epever-xtra-4415n/discharging-equipment-output-overvoltage
+          object_id: epever-xtra-4415n-discharging-equipment-output-overvoltage
+          unique_id: epever-xtra-4415n-discharging-equipment-output-overvoltage
+      - homeassistant/binary_sensor/default/charge-controller-discharging-equipment-fault/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment fault
+          state_topic: epever-xtra-4415n/discharging-equipment-fault
+          object_id: epever-xtra-4415n-discharging-equipment-fault
+          unique_id: epever-xtra-4415n-discharging-equipment-fault
+      - homeassistant/binary_sensor/derunning/charge-controller-discharging-equipment-running/config:
+          device:
+            identifiers: epever-xtra-4415n
+          entity_category: diagnostic
+          name: Discharging equipment running
+          state_topic: epever-xtra-4415n/discharging-equipment-running
+          object_id: epever-xtra-4415n-discharging-equipment-running
+          unique_id: epever-xtra-4415n-discharging-equipment-running
+      - homeassistant/sensor/default/charge-controller-battery-temperature/config:
+          device:
             identifiers: epever-xtra-4415n
           device_class: temperature
           name: Battery Temperature
@@ -775,53 +1865,6 @@ jobs:
           object_id: epever-xtra-4415n-remote-battery-temperature
           unique_id: epever-xtra-4415n-remote-battery-temperature
           unit_of_measurement: °C
-      - homeassistant/sensor/default/charge-controller-battery-voltage-status/config:
-          device:
-            identifiers: epever-xtra-4415n
-          name: Battery Voltage Status
-          entity_category: diagnostic
-          state_class: measurement
-          state_topic: epever-xtra-4415n/battery-voltage-status
-          object_id: epever-xtra-4415n-battery-voltage-status
-          unique_id: epever-xtra-4415n-battery-voltage-status
-      - homeassistant/sensor/default/charge-controller-battery-temperature-status/config:
-          device:
-            identifiers: epever-xtra-4415n
-          entity_category: diagnostic
-          name: Battery Temperature Status
-          state_class: measurement
-          state_topic: epever-xtra-4415n/battery-temperature-status
-          object_id: epever-xtra-4415n-battery-temperature-status
-          unique_id: epever-xtra-4415n-battery-temperature-status
-      - homeassistant/binary_sensor/default/charge-controller-charging-status/config:
-          device:
-            identifiers: epever-xtra-4415n
-          entity_category: diagnostic
-          name: Charging Status
-          payload_off: false
-          payload_on: true
-          state_topic: epever-xtra-4415n/charging-status
-          object_id: epever-xtra-4415n-charging-status
-          unique_id: epever-xtra-4415n-charging-status
-      - homeassistant/binary_sensor/default/charge-controller-charging-fault/config:
-          device:
-            identifiers: epever-xtra-4415n
-          entity_category: diagnostic
-          name: Charging Fault
-          payload_off: false
-          payload_on: true
-          state_topic: epever-xtra-4415n/charging-fault
-          object_id: epever-xtra-4415n-charging-fault
-          unique_id: epever-xtra-4415n-charging-fault
-      - homeassistant/sensor/default/charge-controller-charging-type/config:
-          device:
-            identifiers: epever-xtra-4415n
-          entity_category: diagnostic
-          name: Charging Type
-          state_class: measurement
-          state_topic: epever-xtra-4415n/charging-type
-          object_id: epever-xtra-4415n-charging-type
-          unique_id: epever-xtra-4415n-charging-type
       - homeassistant/sensor/default/charge-controller-combined-battery-temperature/config:
           device:
             identifiers: epever-xtra-4415n
@@ -854,10 +1897,8 @@ jobs:
       - homeassistant/binary_sensor/default/charge-controller-charging-device-on/config:
           device:
             identifiers: epever-xtra-4415n
-          entity_category: config
+          entity_category: diagnostic
           name: Charging Device Turned On
-          payload_off: false
-          payload_on: true
           state_topic: epever-xtra-4415n/charging-device-on
           object_id: epever-xtra-4415n-charging-device-on
           unique_id: epever-xtra-4415n-charging-device-on
@@ -865,7 +1906,6 @@ jobs:
           device:
             identifiers: epever-xtra-4415n
           device_class: voltage
-          entity_category: config
           name: Battery Float Voltage
           state_class: measurement
           state_topic: epever-xtra-4415n/battery-float-voltage
@@ -874,16 +1914,38 @@ jobs:
           unit_of_measurement: V
     sleep: 60
     tasks:
+      - e-battery-voltage-status
+      - e-battery-temperature-status
+      - e-battery-internal-resistance-abnormal
+      - e-battery-voltage-identification-incorrect
+      - e-input-voltage-status
+      - e-charging-mosfet-shorted
+      - e-charging-or-anti-reverse-mosfet-shorted
+      - e-anti-reverse-mosfet-shorted
+      - e-input-overcurrent
+      - e-load-overcurrent
+      - e-load-shorted
+      - e-load-mosfet-shorted
+      - e-charging-type
+      - e-charging-equipment-fault
+      - e-charging-equipment-running
+      - e-load-voltage-status
+      - e-load-power-status
+      - e-discharging-equipment-shorted
+      - e-discharging-equipment-unable-to-discharge
+      - e-discharging-equipment-unable-to-stop-discharging
+      - e-discharging-equipment-output-voltage-abnormal
+      - e-discharging-equipment-input-overvoltage
+      - e-discharging-equipment-high-voltage-side-shorted
+      - e-discharging-equipment-boost-overvoltage
+      - e-discharging-equipment-output-overvoltage
+      - e-discharging-equipment-fault
+      - e-discharging-equipment-running
       - e-battery-temperature
       - e-device-temperature
       - e-power-components-temperature
       - e-battery-estimated-soc
       - e-remote-battery-temperature
-      - e-battery-voltage-status
-      - e-battery-temperature-status
-      - e-charging-status
-      - e-charging-fault
-      - e-charging-type
       - e-combined-battery-temperature
       - e-ambient-temperature
       - e-battery-impedance
@@ -934,26 +1996,6 @@ jobs:
           object_id: epever-xtra-4415n-battery-charging-power
           unique_id: epever-xtra-4415n-battery-charging-power
           unit_of_measurement: W
-      - homeassistant/sensor/default/charge-controller-generated-energy-today/config:
-          device:
-            identifiers: epever-xtra-4415n
-          device_class: energy
-          name: Generated Energy Today
-          state_class: total_increasing
-          state_topic: epever-xtra-4415n/generated-energy-today
-          object_id: epever-xtra-4415n-generated-energy-today
-          unique_id: epever-xtra-4415n-generated-energy-today
-          unit_of_measurement: kWh
-      - homeassistant/sensor/default/charge-controller-generated-energy/config:
-          device:
-            identifiers: epever-xtra-4415n
-          device_class: energy
-          name: Generated Energy
-          state_class: total_increasing
-          state_topic: epever-xtra-4415n/generated-energy
-          object_id: epever-xtra-4415n-generated-energy
-          unique_id: epever-xtra-4415n-generated-energy
-          unit_of_measurement: kWh
       - homeassistant/sensor/default/charge-controller-battery-voltage/config:
           device:
             identifiers: epever-xtra-4415n
@@ -980,12 +2022,41 @@ jobs:
       - e-solar-current
       - e-solar-power
       - e-battery-charging-power
-      - e-generated-energy-today
-      - e-generated-energy
       - e-battery-voltage
       - e-battery-net-current
 
 handlers:
+  - id: e-datetime-set
+    device: epever-xtra-4415n-relaxed-timeout
+    mqtt_topic: epever-xtra-4415n/datetime/set
+    value:
+      type: datetime
+      data:
+        - byte:
+            register_type: holding
+            address: 0x9015
+            byte_index: 0
+            increase_by: 2000
+        - byte:
+            register_type: holding
+            address: 0x9015
+            byte_index: 1
+        - byte:
+            register_type: holding
+            address: 0x9014
+            byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x9014
+            byte_index: 1
+        - byte:
+            register_type: holding
+            address: 0x9013
+            byte_index: 0
+        - byte:
+            register_type: holding
+            address: 0x9013
+            byte_index: 1
   - id: e-battery-equalization-voltage-set
     device: epever-xtra-4415n-relaxed-timeout
     mqtt_topic: epever-xtra-4415n/battery-equalization-voltage/set
@@ -1029,6 +2100,18 @@ handlers:
 services:
   - id: charge-controller-voltages
     mqtt_messages:
+      - homeassistant/text/default/charge-controller-datetime/config:
+          device:
+            name: EPEVER solar charge controller
+            manufacturer: EPEVER
+            model: XTRA 4415N
+            identifiers: epever-xtra-4415n
+          entity_category: config
+          name: Date and Time
+          command_topic: epever-xtra-4415n/datetime/set
+          state_topic: epever-xtra-4415n/datetime
+          object_id: epever-xtra-4415n-datetime-configurable
+          unique_id: epever-xtra-4415n-datetime-configurable
       - homeassistant/number/default/charge-controller-battery-equalization-voltage/config:
           device:
             name: EPEVER solar charge controller
@@ -1037,44 +2120,39 @@ services:
             identifiers: epever-xtra-4415n
           entity_category: config
           name: Battery Equalization Voltage
-          min: 12
-          max: 14.6
           step: 0.01
           state_class: measurement
           command_topic: epever-xtra-4415n/battery-equalization-voltage/set
           state_topic: epever-xtra-4415n/battery-equalization-voltage
-          object_id: epever-xtra-4415n-battery-equalization-voltage
-          unique_id: epever-xtra-4415n-battery-equalization-voltage
+          object_id: epever-xtra-4415n-battery-equalization-voltage-configurable
+          unique_id: epever-xtra-4415n-battery-equalization-voltage-configurable
           unit_of_measurement: V
       - homeassistant/number/default/charge-controller-battery-boost-voltage/config:
           device:
             identifiers: epever-xtra-4415n
           entity_category: config
           name: Battery Boost Voltage
-          min: 12
-          max: 14.6
           step: 0.01
           state_class: measurement
           command_topic: epever-xtra-4415n/battery-boost-voltage/set
           state_topic: epever-xtra-4415n/battery-boost-voltage
-          object_id: epever-xtra-4415n-battery-boost-voltage
-          unique_id: epever-xtra-4415n-battery-boost-voltage
+          object_id: epever-xtra-4415n-battery-boost-voltage-configurable
+          unique_id: epever-xtra-4415n-battery-boost-voltage-configurable
           unit_of_measurement: V
       - homeassistant/number/default/charge-controller-battery-float-voltage/config:
           device:
             identifiers: epever-xtra-4415n
           entity_category: config
           name: Battery Float Voltage
-          min: 12
-          max: 14.6
           step: 0.01
           state_class: measurement
           command_topic: epever-xtra-4415n/battery-float-voltage/set
           state_topic: epever-xtra-4415n/battery-float-voltage
-          object_id: epever-xtra-4415n-battery-float-voltage
-          unique_id: epever-xtra-4415n-battery-float-voltage
+          object_id: epever-xtra-4415n-battery-float-voltage-configurable
+          unique_id: epever-xtra-4415n-battery-float-voltage-configurable
           unit_of_measurement: V
     handlers:
+      - e-datetime-set
       - e-battery-equalization-voltage-set
       - e-battery-boost-voltage-set
       - e-battery-float-voltage-set
