@@ -231,7 +231,6 @@ jobs:
             identifiers: jbd-sp04s034-l4s-200
           entity_category: diagnostic
           name: Hardware Revision
-          state_class: measurement
           state_topic: jbd-sp04s034-l4s-200/hardware-revision
           object_id: jbd-sp04s034-l4s-200-hardware-revision
           unique_id: jbd-sp04s034-l4s-200-hardware-revision
