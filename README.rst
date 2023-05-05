@@ -758,8 +758,8 @@ that might only be present within certain other configuration data structures.
         Available values are:
 
         * ``default``: The device-specific default register type.
-          Some device types like ``ModbusDevice`` do not have the default register type.
-          For those it is necessary to explicitly specify a register type other than ``default``.
+          For devices of type ``ModbusDevice`` the default register type
+          is the ``input`` register type.
 
         * ``coil``: A readable and writable register type which holds one bit of data.
           Available only for devices of type ``ModbusDevice``.
